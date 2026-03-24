@@ -1205,41 +1205,80 @@ function renderTerritoryMap() {
   const container = document.getElementById('svg-container');
   const manzanas = hostTerritoryData?.manzanas || [];
 
-  if (hostTerritoryData?.svg_data) {
-    // Parse and make interactive
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(hostTerritoryData.svg_data, 'image/svg+xml');
-    const svg = doc.querySelector('svg');
+  if (!hostTerritoryData?.svg_data) { renderFallbackMap(container, manzanas); return; }
 
-    if (svg) {
-      // Style and make manzanas interactive
-      // Try to find paths/polygons with manzana IDs or data attributes
-      const paths = svg.querySelectorAll('path, polygon, rect, circle, ellipse');
-      paths.forEach(path => {
-        const mId = path.getAttribute('data-manzana') || path.getAttribute('id') || path.getAttribute('data-id');
-        // Check if this element corresponds to a manzana
-        const matchedManzana = manzanas.find(m => mId && (mId.toUpperCase() === m.toUpperCase() || mId.toUpperCase().includes(m.toUpperCase())));
-        if (matchedManzana || paths.length === manzanas.length) {
-          const mName = matchedManzana || manzanas[Array.from(paths).indexOf(path)] || '';
-          path.setAttribute('data-manzana-id', mName);
-          path.style.cursor = 'pointer';
-          path.style.fill = '#c49a2e';
-          path.style.stroke = '#0f0f0f';
-          path.style.strokeWidth = '2';
-          path.style.transition = 'fill 0.15s';
-          path.addEventListener('click', () => toggleManzana(mName, path));
-          path.addEventListener('touchend', (e) => { e.preventDefault(); toggleManzana(mName, path); });
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(hostTerritoryData.svg_data, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  if (!svg) { renderFallbackMap(container, manzanas); return; }
+
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  svg.style.width = '100%';
+  svg.style.height = '100%';
+  svg.style.maxHeight = '320px';
+
+  const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
+  const matched = new Map();
+
+  // Strategy 1: <g id="a">, <g id="b"> groups
+  svg.querySelectorAll('g[id]').forEach(g => {
+    const gId = g.getAttribute('id').toLowerCase();
+    if (manzanaSet.has(gId)) matched.set(gId, g);
+  });
+
+  // Strategy 2: paths like id="a_2", id="b_2"
+  if (matched.size === 0) {
+    svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+      const elId = el.getAttribute('id').toLowerCase();
+      manzanas.forEach(m => {
+        const ml = m.toLowerCase();
+        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) {
+          matched.set(ml, el);
         }
       });
-
-      container.innerHTML = '';
-      container.appendChild(svg);
-    } else {
-      renderFallbackMap(container, manzanas);
-    }
-  } else {
-    renderFallbackMap(container, manzanas);
+    });
   }
+
+  // Strategy 3: positional fallback
+  if (matched.size === 0) {
+    Array.from(svg.querySelectorAll('path, polygon')).forEach((p, i) => {
+      if (i < manzanas.length) matched.set(manzanas[i].toLowerCase(), p);
+    });
+  }
+
+  matched.forEach((el, letter) => {
+    const mName = manzanas.find(m => m.toLowerCase() === letter) || letter.toUpperCase();
+    const fillEl = el.tagName.toLowerCase() === 'g'
+      ? (el.querySelector('[id$="_2"]') || el.querySelector('path, polygon'))
+      : el;
+    if (!fillEl) return;
+
+    fillEl.setAttribute('fill', '#c49a2e');
+    fillEl.style.transition = 'fill 0.15s';
+    el.style.cursor = 'pointer';
+    el._fillEl = fillEl;
+
+    const onTap = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (selectedManzanas.includes(mName)) {
+        selectedManzanas = selectedManzanas.filter(x => x !== mName);
+        fillEl.setAttribute('fill', '#c49a2e');
+      } else {
+        selectedManzanas.push(mName);
+        fillEl.setAttribute('fill', '#4caf7d');
+      }
+      updateAllToggleState();
+      updateContinueBtn();
+    };
+    el.addEventListener('click', onTap);
+    el.addEventListener('touchend', onTap);
+  });
+
+  container._matchedGroups = matched;
+  container.innerHTML = '';
+  container.appendChild(svg);
 }
 
 function renderFallbackMap(container, manzanas) {
@@ -1297,11 +1336,19 @@ function toggleAll() {
   allSelected = !allSelected;
   document.getElementById('all-toggle').classList.toggle('on', allSelected);
 
+  const container = document.getElementById('svg-container');
+  const matchedGroups = container._matchedGroups;
+
   if (allSelected) {
     selectedManzanas = [...manzanas];
-    // visually select all
-    const container = document.getElementById('svg-container');
-    container.querySelectorAll('[data-manzana-id]').forEach(el => el.style.fill = '#4caf7d');
+    // SVG mode: color each group's fill element
+    if (matchedGroups) {
+      matchedGroups.forEach((el) => {
+        const fillEl = el._fillEl || el;
+        fillEl.setAttribute('fill', '#4caf7d');
+      });
+    }
+    // Tile fallback mode
     container.querySelectorAll('.manzana-tile').forEach(el => {
       el.style.background = 'var(--green)';
       el.style.borderColor = 'var(--green)';
@@ -1309,8 +1356,12 @@ function toggleAll() {
     });
   } else {
     selectedManzanas = [];
-    const container = document.getElementById('svg-container');
-    container.querySelectorAll('[data-manzana-id]').forEach(el => el.style.fill = '#c49a2e');
+    if (matchedGroups) {
+      matchedGroups.forEach((el) => {
+        const fillEl = el._fillEl || el;
+        fillEl.setAttribute('fill', '#c49a2e');
+      });
+    }
     container.querySelectorAll('.manzana-tile').forEach(el => {
       el.style.background = 'var(--gold-dim)';
       el.style.borderColor = 'transparent';
