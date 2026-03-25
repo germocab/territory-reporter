@@ -1148,17 +1148,22 @@ function renderReportSvg(svgData, allManzanas, doneManzanas, allDone) {
       : el;
     if (!fillEl) return;
 
+    // Keep original fill for unselected, green for done
+    const originalFill = fillEl.getAttribute('fill');
     if (isDone) {
-      fillEl.setAttribute('fill', '#4caf7d');  // green solid
+      fillEl.setAttribute('fill', '#22c55e');
+      fillEl.removeAttribute('fill-opacity');
     } else {
-      fillEl.setAttribute('fill', '#c49a2e');
-      fillEl.setAttribute('fill-opacity', '0.25');  // gold transparent
+      // Keep original color but dim it with opacity
+      if (originalFill) fillEl.setAttribute('fill', originalFill);
+      fillEl.setAttribute('fill-opacity', '0.3');
     }
-    // Make text white in done manzanas for contrast
+    // Label contrast
     const labelPath = el.querySelector('[id$="_3"]');
     if (labelPath) {
-      labelPath.setAttribute('fill', isDone ? '#ffffff' : '#c49a2e');
-      if (!isDone) labelPath.setAttribute('fill-opacity', '0.4');
+      labelPath.setAttribute('fill', isDone ? '#ffffff' : (labelPath.getAttribute('fill') || '#000000'));
+      if (!isDone) labelPath.setAttribute('fill-opacity', '0.35');
+      else labelPath.removeAttribute('fill-opacity');
     }
   });
 
@@ -1223,18 +1228,11 @@ async function loadTerritories() {
         svg.style.height = '100%';
         // Style all fill paths with gold, labels white — no interactivity
         const manzanaSet = new Set((t.manzanas||[]).map(m => m.toLowerCase()));
-        svg.querySelectorAll('g[id]').forEach(g => {
-          if (manzanaSet.has(g.getAttribute('id').toLowerCase())) {
-            const fillEl = g.querySelector('[id$="_2"]') || g.querySelector('path, polygon');
-            if (fillEl) { fillEl.setAttribute('fill', '#e8b84b'); fillEl.removeAttribute('fill-opacity'); }
-            const labelEl = g.querySelector('[id$="_3"]');
-            if (labelEl) { labelEl.setAttribute('fill', '#0f0f0f'); labelEl.removeAttribute('fill-opacity'); }
-          }
+        // Keep original SVG colors — don't override fills at all
+        // Just ensure no stale fill-opacity
+        svg.querySelectorAll('path, polygon').forEach(el => {
+          el.removeAttribute('fill-opacity');
         });
-        // Fallback: all paths gold if no group match
-        if (!manzanaSet.size) {
-          svg.querySelectorAll('path, polygon').forEach(el => { el.setAttribute('fill', '#e8b84b'); });
-        }
         svg.style.pointerEvents = 'none';
         svgPreview = new XMLSerializer().serializeToString(svg);
       }
@@ -1556,20 +1554,34 @@ function renderTerritoryMap() {
       : el;
     if (!fillEl) return;
 
-    fillEl.setAttribute('fill', '#c49a2e');
-    fillEl.style.transition = 'fill 0.15s';
+    // Save original color to restore on deselect
+    const originalFill = fillEl.getAttribute('fill') || '#e8b84b';
+    fillEl._originalFill = originalFill;
+
+    // Smooth color transition
+    fillEl.style.transition = 'fill 0.18s ease';
     el.style.cursor = 'pointer';
     el._fillEl = fillEl;
+
+    // Scale animation on the group/element via CSS transform
+    el.style.transformOrigin = 'center';
+    el.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
     const onTap = (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (selectedManzanas.includes(mName)) {
+        // Deselect — restore original color, no scale
         selectedManzanas = selectedManzanas.filter(x => x !== mName);
-        fillEl.setAttribute('fill', '#c49a2e');
+        fillEl.setAttribute('fill', originalFill);
+        fillEl.removeAttribute('fill-opacity');
+        el.style.transform = 'scale(1)';
       } else {
+        // Select — green + scale up
         selectedManzanas.push(mName);
-        fillEl.setAttribute('fill', '#4caf7d');
+        fillEl.setAttribute('fill', '#22c55e');
+        fillEl.removeAttribute('fill-opacity');
+        el.style.transform = 'scale(1.08)';
       }
       updateAllToggleState();
       updateContinueBtn();
@@ -1593,7 +1605,7 @@ function renderFallbackMap(container, manzanas) {
     ${manzanas.map(m => `
       <div class="manzana-tile" data-manzana="${m}"
         onclick="toggleManzanaTile(this, '${m}')"
-        style="width:64px;height:64px;border-radius:14px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;transition:all .15s;font-family:'DM Serif Display',serif;font-size:22px;color:#0f0f0f;font-weight:bold">
+        style="width:64px;height:64px;border-radius:14px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;transition:background .18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1);font-family:'DM Serif Display',serif;font-size:22px;color:#0f0f0f;font-weight:bold;transform-origin:center">
         ${m}
       </div>`).join('')}
   </div>`;
@@ -1617,11 +1629,14 @@ function toggleManzanaTile(el, mName) {
     selectedManzanas = selectedManzanas.filter(x => x !== mName);
     el.style.background = 'var(--gold-dim)';
     el.style.borderColor = 'transparent';
+    el.style.color = '#0f0f0f';
+    el.style.transform = 'scale(1)';
   } else {
     selectedManzanas.push(mName);
-    el.style.background = 'var(--green)';
-    el.style.borderColor = 'var(--green)';
+    el.style.background = '#22c55e';
+    el.style.borderColor = '#22c55e';
     el.style.color = '#fff';
+    el.style.transform = 'scale(1.08)';
   }
   updateAllToggleState();
   updateContinueBtn();
@@ -1643,31 +1658,36 @@ function toggleAll() {
 
   if (allSelected) {
     selectedManzanas = [...manzanas];
-    // SVG mode: color each group's fill element
     if (matchedGroups) {
       matchedGroups.forEach((el) => {
         const fillEl = el._fillEl || el;
-        fillEl.setAttribute('fill', '#4caf7d');
+        fillEl.setAttribute('fill', '#22c55e');
+        fillEl.removeAttribute('fill-opacity');
+        el.style.transform = 'scale(1.08)';
       });
     }
-    // Tile fallback mode
     container.querySelectorAll('.manzana-tile').forEach(el => {
       el.style.background = 'var(--green)';
       el.style.borderColor = 'var(--green)';
       el.style.color = '#fff';
+      el.style.transform = 'scale(1.08)';
     });
   } else {
     selectedManzanas = [];
     if (matchedGroups) {
       matchedGroups.forEach((el) => {
         const fillEl = el._fillEl || el;
-        fillEl.setAttribute('fill', '#c49a2e');
+        // Restore original color saved during render
+        fillEl.setAttribute('fill', fillEl._originalFill || '#e8b84b');
+        fillEl.removeAttribute('fill-opacity');
+        el.style.transform = 'scale(1)';
       });
     }
     container.querySelectorAll('.manzana-tile').forEach(el => {
       el.style.background = 'var(--gold-dim)';
       el.style.borderColor = 'transparent';
       el.style.color = '#0f0f0f';
+      el.style.transform = 'scale(1)';
     });
   }
   updateContinueBtn();
