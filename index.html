@@ -1209,16 +1209,62 @@ async function loadTerritories() {
     const t = tMap[n];
     const mcount = t?.manzanas?.length || 0;
     const hasSvg = !!t?.svg_data;
+
+    // Build a neutral-colored SVG preview (all manzanas in gold, no selection state)
+    let svgPreview = '';
+    if (hasSvg) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+      const svg = doc.querySelector('svg');
+      if (svg) {
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        // Style all fill paths with gold, labels white — no interactivity
+        const manzanaSet = new Set((t.manzanas||[]).map(m => m.toLowerCase()));
+        svg.querySelectorAll('g[id]').forEach(g => {
+          if (manzanaSet.has(g.getAttribute('id').toLowerCase())) {
+            const fillEl = g.querySelector('[id$="_2"]') || g.querySelector('path, polygon');
+            if (fillEl) { fillEl.setAttribute('fill', '#e8b84b'); fillEl.removeAttribute('fill-opacity'); }
+            const labelEl = g.querySelector('[id$="_3"]');
+            if (labelEl) { labelEl.setAttribute('fill', '#0f0f0f'); labelEl.removeAttribute('fill-opacity'); }
+          }
+        });
+        // Fallback: all paths gold if no group match
+        if (!manzanaSet.size) {
+          svg.querySelectorAll('path, polygon').forEach(el => { el.setAttribute('fill', '#e8b84b'); });
+        }
+        svg.style.pointerEvents = 'none';
+        svgPreview = new XMLSerializer().serializeToString(svg);
+      }
+    }
+
     return `
-    <div class="form-card" style="cursor:pointer" onclick="openTerritoryModal(${n})">
-      <div class="form-card-header">
-        <div class="form-card-num">${n}</div>
-        ${hasSvg ? '<span class="badge badge-green">SVG</span>' : '<span class="badge badge-dim">Sin SVG</span>'}
+    <div class="form-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="openTerritoryModal(${n})">
+      <!-- SVG preview area -->
+      <div style="
+        height:${hasSvg ? '140px' : '0'};
+        background:var(--surface2);
+        display:flex;align-items:center;justify-content:center;
+        padding:${hasSvg ? '16px' : '0'};
+        border-bottom:${hasSvg ? '1px solid var(--border)' : 'none'};
+        overflow:hidden;
+        transition:height .2s;
+      ">
+        ${svgPreview}
       </div>
-      <h3>${t?.name || `Territorio ${n}`}</h3>
-      <p>${mcount ? `${mcount} manzana${mcount!==1?'s':''}: ${(t.manzanas||[]).join(', ')}` : 'Sin manzanas configuradas'}</p>
-      <div class="form-card-actions" style="margin-top:10px">
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px">Editar</button>
+      <!-- Card body -->
+      <div style="padding:16px 18px 18px">
+        <div class="form-card-header" style="margin-bottom:10px">
+          <div class="form-card-num">${n}</div>
+          ${hasSvg ? '<span class="badge badge-green">SVG</span>' : '<span class="badge badge-dim">Sin SVG</span>'}
+        </div>
+        <h3 style="margin-bottom:4px">${t?.name || `Territorio ${n}`}</h3>
+        <p style="margin-bottom:14px">${mcount ? `${mcount} manzana${mcount!==1?'s':''}: ${(t.manzanas||[]).join(', ')}` : 'Sin manzanas configuradas'}</p>
+        <div class="form-card-actions">
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px">Editar</button>
+        </div>
       </div>
     </div>`;
   }).join('');
