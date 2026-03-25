@@ -506,7 +506,7 @@
           <table>
             <thead><tr>
               <th>Publicador</th><th>Territorio</th><th>Fecha asignación</th>
-              <th>Cobertura</th><th>Estado</th><th>Manzanas</th>
+              <th>Cobertura</th><th>Estado</th><th>Manzanas</th><th></th>
             </tr></thead>
             <tbody id="reports-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)"><div class="spinner"></div></td></tr></tbody>
           </table>
@@ -923,7 +923,7 @@ async function loadReports() {
   const res = await sb('territory_reports?select=*&order=created_at.desc', { method:'GET' });
   const reports = await res.json();
   const tbody = document.getElementById('reports-tbody');
-  if (!reports.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Sin reportes aún</td></tr>'; return; }
+  if (!reports.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Sin reportes aún</td></tr>'; return; }
   tbody.innerHTML = reports.map(r => {
     const coverage = r.all_territory ? 100 : Math.round((r.manzanas_done?.length||0)/(r.total_manzanas||1)*100);
     const manzanas = r.all_territory ? '<span class="badge badge-green">Territorio completo</span>' : (r.manzanas_done||[]).map(m=>`<span class="badge badge-gold">${m}</span>`).join(' ');
@@ -937,8 +937,28 @@ async function loadReports() {
       </td>
       <td><span class="badge badge-green">✓ Enviado</span></td>
       <td>${manzanas}</td>
+      <td>
+        <button onclick="deleteReport('${r.id}')" title="Eliminar reporte"
+          style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px 8px;border-radius:6px;font-size:16px;line-height:1;transition:color .15s,background .15s"
+          onmouseover="this.style.color='var(--red)';this.style.background='rgba(224,92,92,0.1)'"
+          onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">
+          ✕
+        </button>
+      </td>
     </tr>`;
   }).join('');
+}
+
+async function deleteReport(id) {
+  if (!confirm('¿Eliminar este reporte? Esta acción no se puede deshacer.')) return;
+  const res = await sb(`territory_reports?id=eq.${id}`, { method:'DELETE', prefer:'return=minimal' });
+  if (res.ok) {
+    toast('Reporte eliminado');
+    loadReports();
+    loadDashboard();
+  } else {
+    toast('Error al eliminar', 'error');
+  }
 }
 
 // ── TERRITORIES PANEL ──
