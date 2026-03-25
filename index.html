@@ -497,20 +497,12 @@
     <div id="panel-reports" class="admin-panel">
       <p class="panel-title">Reportes</p>
       <p class="panel-subtitle">Respuestas recibidas de los publicadores</p>
-      <div class="table-card">
-        <div class="table-header">
-          <h3>Todos los reportes</h3>
-          <button class="btn btn-ghost" onclick="loadReports()" style="padding:7px 14px;font-size:12px">↺ Actualizar</button>
-        </div>
-        <div id="reports-table-wrap" style="overflow-x:auto">
-          <table>
-            <thead><tr>
-              <th>Publicador</th><th>Territorio</th><th>Fecha asignación</th>
-              <th>Cobertura</th><th>Estado</th><th>Manzanas</th><th></th>
-            </tr></thead>
-            <tbody id="reports-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)"><div class="spinner"></div></td></tr></tbody>
-          </table>
-        </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <span id="reports-count" style="font-size:13px;color:var(--text-muted)"></span>
+        <button class="btn btn-ghost" onclick="loadReports()" style="padding:7px 14px;font-size:12px">↺ Actualizar</button>
+      </div>
+      <div id="reports-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+        <div style="text-align:center;padding:60px;color:var(--text-muted)"><div class="spinner"></div></div>
       </div>
     </div>
 
@@ -920,33 +912,142 @@ function copyLink(link) {
 
 // ── REPORTS ──
 async function loadReports() {
-  const res = await sb('territory_reports?select=*&order=created_at.desc', { method:'GET' });
-  const reports = await res.json();
-  const tbody = document.getElementById('reports-tbody');
-  if (!reports.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Sin reportes aún</td></tr>'; return; }
-  tbody.innerHTML = reports.map(r => {
+  const [repRes, terRes] = await Promise.all([
+    sb('territory_reports?select=*&order=created_at.desc', { method:'GET' }),
+    sb('territories?select=*', { method:'GET' })
+  ]);
+  const reports = await repRes.json();
+  const territories = await terRes.json();
+
+  // Build territory map: number → territory data
+  const tMap = {};
+  if (Array.isArray(territories)) territories.forEach(t => tMap[t.number] = t);
+
+  const container = document.getElementById('reports-cards');
+  const countEl = document.getElementById('reports-count');
+
+  if (!reports.length) {
+    container.innerHTML = '<div class="empty-state"><h3>Sin reportes aún</h3></div>';
+    countEl.textContent = '';
+    return;
+  }
+
+  countEl.textContent = `${reports.length} reporte${reports.length !== 1 ? 's' : ''}`;
+
+  container.innerHTML = reports.map(r => {
+    const territory = tMap[r.territory_num];
     const coverage = r.all_territory ? 100 : Math.round((r.manzanas_done?.length||0)/(r.total_manzanas||1)*100);
-    const manzanas = r.all_territory ? '<span class="badge badge-green">Territorio completo</span>' : (r.manzanas_done||[]).map(m=>`<span class="badge badge-gold">${m}</span>`).join(' ');
-    return `<tr>
-      <td><strong>${r.host_name}</strong></td>
-      <td><span class="badge badge-dim">T${r.territory_num}</span></td>
-      <td>${formatDate(r.created_at)}</td>
-      <td>
-        ${coverage}%
-        <span class="progress-bar"><span class="progress-fill" style="width:${coverage}%"></span></span>
-      </td>
-      <td><span class="badge badge-green">✓ Enviado</span></td>
-      <td>${manzanas}</td>
-      <td>
+    const doneManzanas = new Set((r.manzanas_done||[]).map(m => m.toLowerCase()));
+    const svgHtml = territory?.svg_data ? renderReportSvg(territory.svg_data, territory.manzanas || [], doneManzanas, r.all_territory) : renderReportTiles(territory?.manzanas || [], doneManzanas, r.all_territory);
+
+    return `
+    <div class="report-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border)'">
+      <!-- Header -->
+      <div style="padding:16px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;color:#0f0f0f;flex-shrink:0">${r.territory_num}</div>
+          <div>
+            <div style="font-weight:600;font-size:14px">${r.host_name}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${formatDate(r.created_at)}</div>
+          </div>
+        </div>
         <button onclick="deleteReport('${r.id}')" title="Eliminar reporte"
-          style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px 8px;border-radius:6px;font-size:16px;line-height:1;transition:color .15s,background .15s"
+          style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px 8px;border-radius:6px;font-size:16px;line-height:1;transition:color .15s,background .15s;flex-shrink:0"
           onmouseover="this.style.color='var(--red)';this.style.background='rgba(224,92,92,0.1)'"
-          onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">
-          ✕
-        </button>
-      </td>
-    </tr>`;
+          onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">✕</button>
+      </div>
+
+      <!-- SVG preview -->
+      <div style="padding:16px;background:var(--surface2);display:flex;align-items:center;justify-content:center;min-height:160px">
+        ${svgHtml}
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:12px;color:var(--text-muted)">
+          ${r.all_territory ? '<span class="badge badge-green">Territorio completo</span>' : `<span style="font-size:12px;color:var(--text-muted)">${(r.manzanas_done||[]).join(', ')}</span>`}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:600;color:${coverage===100?'var(--green)':'var(--gold)'}">${coverage}%</span>
+          <span class="progress-bar" style="width:60px"><span class="progress-fill" style="width:${coverage}%;background:${coverage===100?'var(--green)':'var(--gold)'}"></span></span>
+        </div>
+      </div>
+    </div>`;
   }).join('');
+}
+
+function renderReportSvg(svgData, allManzanas, doneManzanas, allDone) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgData, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  if (!svg) return renderReportTiles(allManzanas, doneManzanas, allDone);
+
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  svg.style.width = '100%';
+  svg.style.maxHeight = '180px';
+
+  const manzanaSet = new Set(allManzanas.map(m => m.toLowerCase()));
+
+  // Find groups matching manzana letters
+  const matched = new Map();
+  svg.querySelectorAll('g[id]').forEach(g => {
+    const gId = g.getAttribute('id').toLowerCase();
+    if (manzanaSet.has(gId)) matched.set(gId, g);
+  });
+
+  // Fallback: paths like id="a_2"
+  if (matched.size === 0) {
+    svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+      const elId = el.getAttribute('id').toLowerCase();
+      allManzanas.forEach(m => {
+        const ml = m.toLowerCase();
+        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) {
+          matched.set(ml, el);
+        }
+      });
+    });
+  }
+
+  matched.forEach((el, letter) => {
+    const isDone = allDone || doneManzanas.has(letter);
+    const fillEl = el.tagName.toLowerCase() === 'g'
+      ? (el.querySelector('[id$="_2"]') || el.querySelector('path, polygon'))
+      : el;
+    if (!fillEl) return;
+
+    if (isDone) {
+      fillEl.setAttribute('fill', '#4caf7d');  // green solid
+    } else {
+      fillEl.setAttribute('fill', '#c49a2e');
+      fillEl.setAttribute('fill-opacity', '0.25');  // gold transparent
+    }
+    // Make text white in done manzanas for contrast
+    const labelPath = el.querySelector('[id$="_3"]');
+    if (labelPath) {
+      labelPath.setAttribute('fill', isDone ? '#ffffff' : '#c49a2e');
+      if (!isDone) labelPath.setAttribute('fill-opacity', '0.4');
+    }
+  });
+
+  // Serialize back to string
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(svg);
+}
+
+function renderReportTiles(allManzanas, doneManzanas, allDone) {
+  if (!allManzanas.length) return '<p style="color:var(--text-muted);font-size:12px">Sin manzanas configuradas</p>';
+  return `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+    ${allManzanas.map(m => {
+      const done = allDone || doneManzanas.has(m.toLowerCase());
+      return `<div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:18px;font-weight:bold;
+        background:${done ? 'var(--green)' : 'rgba(196,154,46,0.2)'};
+        color:${done ? '#fff' : 'rgba(196,154,46,0.5)'};
+        border:2px solid ${done ? 'var(--green)' : 'rgba(196,154,46,0.3)'}">
+        ${m}
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 async function deleteReport(id) {
@@ -1170,7 +1271,7 @@ async function initHostScreen(token) {
   // Load form
   const fRes = await sb(`territory_forms?token=eq.${token}&select=*`, { method:'GET' });
   const forms = await fRes.json();
-  if (!forms.length) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace Expirado</h2><p>Este enlace no es válido. Fue eliminado o está fuera de plazo. Por favor comunicate con el auxiliar del SS</p></div></div>'; return; }
+  if (!forms.length) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace inválido</h2><p>Este enlace no existe o ha expirado.</p></div></div>'; return; }
   hostFormData = forms[0];
 
   // Check if already submitted
