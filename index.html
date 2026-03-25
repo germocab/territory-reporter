@@ -24,6 +24,43 @@
     --text-dim: #4a4540;
     --radius: 14px;
     --radius-sm: 8px;
+    --theme-transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  }
+
+  /* ─── LIGHT MODE ─── */
+  html.light {
+    --bg: #f5f2ec;
+    --surface: #ffffff;
+    --surface2: #ede9e1;
+    --border: #d8d2c8;
+    --gold: #c4850a;
+    --gold-dim: #a06d08;
+    --gold-pale: #c4850a18;
+    --green: #2d8f5e;
+    --green-pale: #2d8f5e18;
+    --red: #c94040;
+    --text: #1a1714;
+    --text-muted: #7a7060;
+    --text-dim: #b0a898;
+  }
+
+  /* ─── SYSTEM PREFERENCE ─── */
+  @media (prefers-color-scheme: light) {
+    html:not(.dark) {
+      --bg: #f5f2ec;
+      --surface: #ffffff;
+      --surface2: #ede9e1;
+      --border: #d8d2c8;
+      --gold: #c4850a;
+      --gold-dim: #a06d08;
+      --gold-pale: #c4850a18;
+      --green: #2d8f5e;
+      --green-pale: #2d8f5e18;
+      --red: #c94040;
+      --text: #1a1714;
+      --text-muted: #7a7060;
+      --text-dim: #b0a898;
+    }
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -34,6 +71,7 @@
     font-family: 'Instrument Sans', sans-serif;
     min-height: 100dvh;
     overflow-x: hidden;
+    transition: var(--theme-transition);
   }
 
   /* ─── NOISE TEXTURE OVERLAY ─── */
@@ -394,6 +432,29 @@
   /* Loading spinner */
   .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; margin: 0 8px 8px;
+    border-radius: 10px; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text-muted);
+    font-size: 12px; font-family: 'Instrument Sans', sans-serif; font-weight: 500;
+    transition: all 0.15s; user-select: none;
+  }
+  .theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+  .theme-toggle-icon { font-size: 15px; }
+
+  /* Mobile theme toggle (host screen) */
+  .host-theme-btn {
+    position: fixed; top: 16px; right: 16px; z-index: 100;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 17px; transition: all 0.15s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .host-theme-btn:hover { border-color: var(--gold); transform: scale(1.08); }
 </style>
 </head>
 <body>
@@ -445,6 +506,10 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       Nuevo formulario
     </a>
+    <button class="theme-toggle" onclick="toggleTheme()" id="sidebar-theme-btn">
+      <span class="theme-toggle-icon" id="sidebar-theme-icon"></span>
+      <span id="sidebar-theme-label">Modo claro</span>
+    </button>
     <a class="nav-item" onclick="doLogout()" style="color:var(--red)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
@@ -568,6 +633,11 @@
      HOST MOBILE SCREEN
 ════════════════════════════════════════ -->
 <div id="host-screen" class="hidden">
+
+  <!-- Floating theme button (always visible on host screen) -->
+  <button class="host-theme-btn" onclick="toggleTheme()" id="host-theme-btn" title="Cambiar tema">
+    <svg id="host-theme-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"></svg>
+  </button>
 
   <!-- Step 0: Welcome -->
   <div id="host-step-0" class="host-welcome">
@@ -702,6 +772,64 @@ const sb = (path, opts = {}) => {
 };
 
 // ════════════════════════════════════════
+// THEME
+// ════════════════════════════════════════
+function initTheme() {
+  // Check saved preference first, then system preference
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = saved ? saved === 'dark' : prefersDark;
+  applyTheme(isDark ? 'dark' : 'light', false);
+
+  // Listen for system changes (only if no manual override saved)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light', false);
+  });
+}
+
+function applyTheme(mode, save = true) {
+  const html = document.documentElement;
+  if (mode === 'light') {
+    html.classList.add('light');
+    html.classList.remove('dark');
+  } else {
+    html.classList.add('dark');
+    html.classList.remove('light');
+  }
+  if (save) localStorage.setItem('theme', mode);
+  updateThemeButtons(mode);
+  // Redraw charts so grid/label colors match new theme
+  const dashboardActive = document.getElementById('panel-dashboard')?.classList.contains('active');
+  if (dashboardActive) setTimeout(() => loadDashboard(), 50);
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.contains('light');
+  // If neither class set, check computed background to determine current
+  const current = isLight ? 'light' : 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+const SUN_SVG = `<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+const MOON_SVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+
+function makeThemeIcon(isDark, size=16) {
+  return `<svg width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${isDark ? SUN_SVG : MOON_SVG}</svg>`;
+}
+
+function updateThemeButtons(mode) {
+  const isDark = mode === 'dark';
+  // Sidebar toggle
+  const icon = document.getElementById('sidebar-theme-icon');
+  const label = document.getElementById('sidebar-theme-label');
+  if (icon) icon.innerHTML = makeThemeIcon(isDark, 15);
+  if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+  // Host floating button
+  const hostIcon = document.getElementById('host-theme-icon');
+  if (hostIcon) hostIcon.innerHTML = isDark ? SUN_SVG : MOON_SVG;
+}
+
+// ════════════════════════════════════════
 // ROUTING
 // ════════════════════════════════════════
 const params = new URLSearchParams(location.search);
@@ -709,6 +837,7 @@ const viewParam = params.get('view');
 const tokenParam = params.get('token');
 
 window.addEventListener('load', () => {
+  initTheme();
   if (tokenParam) {
     initHostScreen(tokenParam);
   } else if (viewParam === 'admin' || !tokenParam) {
@@ -848,6 +977,9 @@ function drawChart(id, type, labels, data, label, color, horizontal=false) {
   if (!ctx) return;
   if (charts[id]) charts[id].destroy();
   const isArr = Array.isArray(color);
+  const style = getComputedStyle(document.documentElement);
+  const mutedColor = style.getPropertyValue('--text-muted').trim() || '#7a7570';
+  const borderColor = style.getPropertyValue('--border').trim() || '#2e2e2e';
   charts[id] = new Chart(ctx, {
     type,
     data: {
@@ -857,10 +989,10 @@ function drawChart(id, type, labels, data, label, color, horizontal=false) {
     options: {
       responsive: true, maintainAspectRatio: false,
       indexAxis: horizontal ? 'y' : 'x',
-      plugins: { legend: { display: type==='doughnut', labels:{ color:'#7a7570', font:{size:11} } } },
+      plugins: { legend: { display: type==='doughnut', labels:{ color: mutedColor, font:{size:11} } } },
       scales: type !== 'doughnut' ? {
-        x: { ticks:{ color:'#7a7570', font:{size:10} }, grid:{ color:'#2e2e2e' } },
-        y: { ticks:{ color:'#7a7570', font:{size:10} }, grid:{ color:'#2e2e2e' } }
+        x: { ticks:{ color: mutedColor, font:{size:10} }, grid:{ color: borderColor } },
+        y: { ticks:{ color: mutedColor, font:{size:10} }, grid:{ color: borderColor } }
       } : {}
     }
   });
