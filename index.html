@@ -1170,7 +1170,7 @@ async function initHostScreen(token) {
   // Load form
   const fRes = await sb(`territory_forms?token=eq.${token}&select=*`, { method:'GET' });
   const forms = await fRes.json();
-  if (!forms.length) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace inválido</h2><p>Este enlace ha expirado.</p></div></div>'; return; }
+  if (!forms.length) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace Expirado</h2><p>Este enlace no es válido. Fue eliminado o está fuera de plazo. Por favor comunicate con el auxiliar del SS</p></div></div>'; return; }
   hostFormData = forms[0];
 
   // Check if already submitted
