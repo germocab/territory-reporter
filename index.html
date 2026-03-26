@@ -502,10 +502,7 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
       Territorios
     </a>
-    <a class="nav-item" onclick="showPanel('create')" data-panel="create" style="margin-top:auto">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      Nuevo formulario
-    </a>
+
     <button class="theme-toggle" onclick="toggleTheme()" id="sidebar-theme-btn">
       <span class="theme-toggle-icon" id="sidebar-theme-icon"></span>
       <span id="sidebar-theme-label">Modo claro</span>
@@ -551,8 +548,57 @@
 
     <!-- ── FORMS LIST ── -->
     <div id="panel-forms" class="admin-panel">
-      <p class="panel-title">Formularios</p>
-      <p class="panel-subtitle">Formularios enviados a publicadores</p>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap">
+        <div>
+          <p class="panel-title" style="margin-bottom:4px">Formularios</p>
+          <p class="panel-subtitle" style="margin-bottom:0">Formularios enviados a publicadores</p>
+        </div>
+        <button class="btn btn-gold" onclick="toggleCreateForm()" id="btn-toggle-create">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Nuevo formulario
+        </button>
+      </div>
+
+      <!-- Inline create form (collapsible) -->
+      <div id="create-form-inline" class="hidden" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:28px;animation:fadeUp .25s ease">
+        <p style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo formulario</p>
+        <div class="create-form-grid">
+          <div class="form-group">
+            <label>Publicador</label>
+            <input type="text" id="cf-host" placeholder="Ej: Nico">
+          </div>
+          <div class="form-group">
+            <label>Número de territorio</label>
+            <select id="cf-territory"><option value="">Seleccionar...</option></select>
+          </div>
+          <div class="form-group full-width">
+            <label>Fecha de asignación</label>
+            <input type="date" id="cf-date">
+          </div>
+          <div class="form-group full-width">
+            <label>Notas / Instrucciones (opcional)</label>
+            <textarea id="cf-notes" rows="2" placeholder="Instrucciones especiales, horarios, etc."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-gold" onclick="createForm()" id="btn-create-form">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Generar enlace
+          </button>
+          <button class="btn btn-ghost" onclick="toggleCreateForm()">Cancelar</button>
+        </div>
+        <div id="created-link-box" class="hidden" style="margin-top:20px">
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px">
+            <p style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Enlace generado</p>
+            <div class="link-box" id="created-link-text" onclick="copyCreatedLink()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span id="created-link-url"></span>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Haz clic para copiar y compartir</p>
+          </div>
+        </div>
+      </div>
+
       <div id="forms-grid" class="forms-grid">
         <div class="empty-state"><div class="spinner"></div></div>
       </div>
@@ -580,51 +626,7 @@
       </div>
     </div>
 
-    <!-- ── CREATE FORM ── -->
-    <div id="panel-create" class="admin-panel">
-      <p class="panel-title">Nuevo formulario</p>
-      <p class="panel-subtitle">Crea y envía un formulario de territorio a un publicador</p>
-      <div style="max-width:600px">
-        <div class="create-form-grid">
-          <div class="form-group">
-            <label>Publicador (nombre del host)</label>
-            <input type="text" id="cf-host" placeholder="Ej: Nico">
-          </div>
-          <div class="form-group">
-            <label>Número de territorio</label>
-            <select id="cf-territory">
-              <option value="">Seleccionar...</option>
-            </select>
-          </div>
-          <div class="form-group full-width">
-            <label>Fecha de asignación</label>
-            <input type="date" id="cf-date">
-          </div>
-          <div class="form-group full-width">
-            <label>Notas / Instrucciones (opcional)</label>
-            <textarea id="cf-notes" rows="3" placeholder="Instrucciones especiales, horarios, etc."></textarea>
-          </div>
-        </div>
 
-        <div style="margin-top:8px">
-          <button class="btn btn-gold" onclick="createForm()" id="btn-create-form">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Generar enlace
-          </button>
-        </div>
-
-        <div id="created-link-box" class="hidden" style="margin-top:24px">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-            <p style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Enlace generado</p>
-            <div class="link-box" id="created-link-text" onclick="copyCreatedLink()">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span id="created-link-url"></span>
-            </div>
-            <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Haz clic para copiar y compartir con el publicador</p>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </main>
 </div>
@@ -1415,11 +1417,15 @@ async function createForm() {
     const data = await res.json();
 
     if (res.ok) {
-      // Build link — works both on localhost and deployed
       const base = location.href.split('?')[0];
       const link = `${base}?token=${token}`;
       document.getElementById('created-link-url').textContent = link;
       document.getElementById('created-link-box').classList.remove('hidden');
+      // Reset form fields but keep link visible
+      document.getElementById('cf-host').value = '';
+      document.getElementById('cf-notes').value = '';
+      document.getElementById('cf-territory').value = '';
+      document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
       toast('¡Formulario creado!');
       loadForms(); loadDashboard();
     } else {
@@ -1438,6 +1444,26 @@ async function createForm() {
 function copyCreatedLink() {
   const url = document.getElementById('created-link-url').textContent;
   navigator.clipboard.writeText(url).then(() => toast('¡Enlace copiado!'));
+}
+
+function toggleCreateForm() {
+  const box = document.getElementById('create-form-inline');
+  const isHidden = box.classList.contains('hidden');
+  box.classList.toggle('hidden');
+  if (isHidden) {
+    // Opening — populate select and set today's date
+    populateTerritorySelect();
+    document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('created-link-box').classList.add('hidden');
+    document.getElementById('cf-host').focus();
+  } else {
+    // Closing — reset fields
+    document.getElementById('created-link-box').classList.add('hidden');
+    document.getElementById('cf-host').value = '';
+    document.getElementById('cf-notes').value = '';
+    document.getElementById('cf-territory').value = '';
+    document.getElementById('cf-date').value = '';
+  }
 }
 
 // ════════════════════════════════════════
