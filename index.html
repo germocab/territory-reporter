@@ -876,7 +876,9 @@ function genToken() {
 
 function formatDate(d) {
   if (!d) return '–';
-  return new Date(d).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+  // Parse date-only strings (YYYY-MM-DD) as local time to avoid UTC offset shifting the day
+  const date = d.includes('T') ? new Date(d) : new Date(d + 'T12:00:00');
+  return date.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
 }
 
 // ════════════════════════════════════════
