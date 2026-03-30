@@ -1214,7 +1214,7 @@ async function loadTerritories() {
   territories.forEach(t => tMap[t.number] = t);
 
   const grid = document.getElementById('territories-grid');
-  grid.innerHTML = Array.from({length:36}, (_,i) => i+1).map(n => {
+  grid.innerHTML = Array.from({length:37}, (_,i) => i+1).map(n => {
     const t = tMap[n];
     const mcount = t?.manzanas?.length || 0;
     const hasSvg = !!t?.svg_data;
@@ -1392,7 +1392,7 @@ async function saveTerritory() {
 async function populateTerritorySelect() {
   const sel = document.getElementById('cf-territory');
   sel.innerHTML = '<option value="">Seleccionar...</option>';
-  for (let i = 1; i <= 36; i++) {
+  for (let i = 1; i <= 37; i++) {
     sel.innerHTML += `<option value="${i}">Territorio ${i}</option>`;
   }
 }
