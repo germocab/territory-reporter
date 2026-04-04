@@ -561,24 +561,39 @@
 
       <!-- Inline create form (collapsible) -->
       <div id="create-form-inline" class="hidden" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:28px;animation:fadeUp .25s ease">
-        <p style="font-size:15px;font-weight:600;margin-bottom:16px">Nuevo formulario</p>
+        <p style="font-size:15px;font-weight:600;margin-bottom:4px">Nuevo formulario</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Puedes asignar hasta 3 territorios por enlace</p>
         <div class="create-form-grid">
           <div class="form-group">
             <label>Publicador</label>
             <input type="text" id="cf-host" placeholder="Ej: Nico">
           </div>
-          <div class="form-group">
-            <label>Número de territorio</label>
-            <select id="cf-territory"><option value="">Seleccionar...</option></select>
-          </div>
           <div class="form-group full-width">
             <label>Fecha de asignación</label>
             <input type="date" id="cf-date">
           </div>
-          <div class="form-group full-width">
-            <label>Notas / Instrucciones (opcional)</label>
-            <textarea id="cf-notes" rows="2" placeholder="Instrucciones especiales, horarios, etc."></textarea>
+        </div>
+        <!-- Territory slots -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:12px;color:var(--text-muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;display:block">Territorios asignados</label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0f0f0f;flex-shrink:0">1</div>
+              <select id="cf-territory-1" style="flex:1"><option value="">Seleccionar territorio...</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;background:var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-muted);flex-shrink:0">2</div>
+              <select id="cf-territory-2" style="flex:1"><option value="">Opcional</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;background:var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-muted);flex-shrink:0">3</div>
+              <select id="cf-territory-3" style="flex:1"><option value="">Opcional</option></select>
+            </div>
           </div>
+        </div>
+        <div class="form-group">
+          <label>Notas / Instrucciones (opcional)</label>
+          <textarea id="cf-notes" rows="2" placeholder="Instrucciones especiales, horarios, etc."></textarea>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <button class="btn btn-gold" onclick="createForm()" id="btn-create-form">
@@ -636,41 +651,49 @@
 ════════════════════════════════════════ -->
 <div id="host-screen" class="hidden">
 
-  <!-- Floating theme button (always visible on host screen) -->
+  <!-- Floating theme button -->
   <button class="host-theme-btn" onclick="toggleTheme()" id="host-theme-btn" title="Cambiar tema">
     <svg id="host-theme-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"></svg>
   </button>
 
-  <!-- Step 0: Welcome -->
+  <!-- Step 0: Welcome + territory overview -->
   <div id="host-step-0" class="host-welcome">
-    <div class="territory-badge-big" id="host-territory-num">5</div>
-    <h1 class="host-welcome-name">¡Hola, <span id="host-name-display">Nico</span>!</h1>
-    <p class="host-welcome-sub">Envía tu informe del territorio<br>de hoy.</p>
-    <button class="btn btn-gold" onclick="hostStep(1)">
-      Comenzar
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </button>
+    <h1 class="host-welcome-name" style="margin-bottom:6px">¡Hola, <span id="host-name-display">Nico</span>!</h1>
+    <p class="host-welcome-sub" id="host-welcome-sub">Toca un territorio para reportarlo.</p>
+    <!-- Territory map cards (injected by JS) -->
+    <div id="host-territory-cards" style="width:100%;display:flex;flex-direction:column;gap:12px;margin-bottom:24px"></div>
+    <!-- All done state (hidden until all reported) -->
+    <div id="host-all-done" class="hidden" style="text-align:center">
+      <div class="sent-icon" style="margin:0 auto 16px">
+        <svg width="32" height="32" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px">¡Todo enviado!</h2>
+      <p style="color:var(--text-muted);font-size:14px">Todos los territorios han sido reportados.</p>
+    </div>
   </div>
 
   <!-- Step 1: Select manzanas -->
   <div id="host-step-1" class="host-select hidden">
     <div class="host-select-header">
-      <div class="territory-num" id="host-sel-num">5</div>
-      <h2>Territorio <span id="host-sel-territory"></span></h2>
-      <p>Selecciona las manzanas abarcadas</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div class="territory-num" id="host-sel-num">5</div>
+        <h2 style="font-family:'DM Serif Display',serif;font-size:22px">Territorio <span id="host-sel-territory"></span></h2>
+      </div>
+      <p style="color:var(--text-muted);font-size:13px">Selecciona las manzanas abarcadas</p>
     </div>
 
-    <div class="svg-territory-container" id="svg-container">
-      <!-- SVG injected here -->
-    </div>
+    <div class="svg-territory-container" id="svg-container"></div>
 
     <div class="toggle-row">
       <span>Todo el territorio</span>
       <div class="toggle" id="all-toggle" onclick="toggleAll()"></div>
     </div>
 
-    <div class="host-actions">
-      <button class="btn btn-gold" id="btn-continue" onclick="hostStep(2)" disabled>
+    <div class="host-actions" style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="hostStep(0)" style="flex:0 0 auto;padding:15px 18px">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="btn btn-gold" id="btn-continue" onclick="hostStep(2)" disabled style="flex:1;justify-content:center;padding:15px">
         Continuar
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
@@ -689,19 +712,10 @@
       <p class="subtitle" id="confirm-subtitle">¿Quieres enviar tu reporte?</p>
       <div class="confirm-manzanas" id="confirm-manzanas-list"></div>
     </div>
-    <button class="btn btn-green" onclick="submitReport()" id="btn-submit">
+    <button class="btn btn-green" onclick="submitReport()" id="btn-submit" style="width:100%;justify-content:center;padding:15px;font-size:15px">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
       Enviar
     </button>
-  </div>
-
-  <!-- Step 3: Sent -->
-  <div id="host-step-3" class="host-sent hidden">
-    <div class="sent-icon">
-      <svg width="32" height="32" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
-    <h2 id="sent-title">Territorio 5 completado</h2>
-    <p>Reporte enviado</p>
   </div>
 
 </div>
@@ -1007,24 +1021,45 @@ async function loadForms() {
   const res = await sb('territory_forms?select=*&order=created_at.desc', { method:'GET' });
   const forms = await res.json();
   const grid = document.getElementById('forms-grid');
-  if (!forms.length) { grid.innerHTML = '<div class="empty-state"><h3>Sin formularios aún</h3><p>Crea el primero desde "Nuevo formulario"</p></div>'; return; }
+  if (!forms.length) { grid.innerHTML = '<div class="empty-state"><h3>Sin formularios aún</h3><p>Crea el primero con "Nuevo formulario"</p></div>'; return; }
 
-  // load reports to show status
-  const rRes = await sb('territory_reports?select=form_id', { method:'GET' });
+  const rRes = await sb('territory_reports?select=form_id,territory_num', { method:'GET' });
   const reports = await rRes.json();
-  const answered = new Set(reports.map(r => r.form_id));
+
+  // Map form_id → set of reported territory_nums
+  const reportedMap = {};
+  reports.forEach(r => {
+    if (!reportedMap[r.form_id]) reportedMap[r.form_id] = new Set();
+    reportedMap[r.form_id].add(r.territory_num);
+  });
 
   grid.innerHTML = forms.map(f => {
-    const done = answered.has(f.id);
-    const link = `${location.origin}${location.pathname}?token=${f.token}`;
+    const nums = f.territory_nums || (f.territory_num ? [f.territory_num] : []);
+    const reported = reportedMap[f.id] || new Set();
+    const allDone = nums.length > 0 && nums.every(n => reported.has(n));
+    const someReported = nums.some(n => reported.has(n));
+    const statusBadge = allDone
+      ? '<span class="badge badge-green">✓ Completado</span>'
+      : someReported
+        ? '<span class="badge badge-gold">En progreso</span>'
+        : '<span class="badge badge-dim">Pendiente</span>';
+
+    const link = `${location.href.split('?')[0]}?token=${f.token}`;
+
+    // Territory badges row
+    const tBadges = nums.map(n => {
+      const done = reported.has(n);
+      return `<span class="badge ${done ? 'badge-green' : 'badge-dim'}" style="font-size:12px">T${n}${done ? ' ✓' : ''}</span>`;
+    }).join('');
+
     return `
     <div class="form-card">
       <div class="form-card-header">
-        <div class="form-card-num">${f.territory_num}</div>
-        <span class="badge ${done ? 'badge-green' : 'badge-dim'}">${done ? '✓ Respondido' : 'Pendiente'}</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${tBadges}</div>
+        ${statusBadge}
       </div>
-      <h3>${f.host_name}</h3>
-      <p>Territorio ${f.territory_num} · ${formatDate(f.assignment_date)}${f.notes ? '<br><em>' + f.notes + '</em>' : ''}</p>
+      <h3 style="margin-bottom:2px">${f.host_name}</h3>
+      <p style="margin-bottom:12px">${formatDate(f.assignment_date)}${f.notes ? ' · <em>' + f.notes + '</em>' : ''}</p>
       <div class="link-box" onclick="copyLink('${link}')" title="Copiar enlace">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${link}</span>
@@ -1048,133 +1083,93 @@ function copyLink(link) {
 
 // ── REPORTS ──
 async function loadReports() {
-  const [repRes, terRes] = await Promise.all([
+  const [repRes, terRes, formRes] = await Promise.all([
     sb('territory_reports?select=*&order=created_at.desc', { method:'GET' }),
-    sb('territories?select=*', { method:'GET' })
+    sb('territories?select=*', { method:'GET' }),
+    sb('territory_forms?select=*', { method:'GET' })
   ]);
   const reports = await repRes.json();
   const territories = await terRes.json();
+  const forms = await formRes.json();
 
-  // Build territory map: number → territory data
   const tMap = {};
   if (Array.isArray(territories)) territories.forEach(t => tMap[t.number] = t);
+
+  // Group reports by form_id
+  const formMap = {};
+  if (Array.isArray(forms)) forms.forEach(f => formMap[f.id] = f);
+
+  const byForm = {};
+  reports.forEach(r => {
+    if (!byForm[r.form_id]) byForm[r.form_id] = [];
+    byForm[r.form_id].push(r);
+  });
 
   const container = document.getElementById('reports-cards');
   const countEl = document.getElementById('reports-count');
 
   if (!reports.length) {
     container.innerHTML = '<div class="empty-state"><h3>Sin reportes aún</h3></div>';
-    countEl.textContent = '';
-    return;
+    countEl.textContent = ''; return;
   }
 
   countEl.textContent = `${reports.length} reporte${reports.length !== 1 ? 's' : ''}`;
 
-  container.innerHTML = reports.map(r => {
-    const territory = tMap[r.territory_num];
-    const coverage = r.all_territory ? 100 : Math.round((r.manzanas_done?.length||0)/(r.total_manzanas||1)*100);
-    const doneManzanas = new Set((r.manzanas_done||[]).map(m => m.toLowerCase()));
-    const svgHtml = territory?.svg_data ? renderReportSvg(territory.svg_data, territory.manzanas || [], doneManzanas, r.all_territory) : renderReportTiles(territory?.manzanas || [], doneManzanas, r.all_territory);
+  // Sort form groups by most recent report
+  const formGroups = Object.entries(byForm).sort((a, b) => {
+    const latestA = Math.max(...a[1].map(r => new Date(r.created_at)));
+    const latestB = Math.max(...b[1].map(r => new Date(r.created_at)));
+    return latestB - latestA;
+  });
+
+  container.innerHTML = formGroups.map(([formId, reps]) => {
+    const form = formMap[formId];
+    const hostName = reps[0].host_name;
+    const latestDate = reps.reduce((a, b) => a.created_at > b.created_at ? a : b).created_at;
+
+    // Build side-by-side maps
+    const mapsHtml = reps.map(r => {
+      const t = tMap[r.territory_num];
+      const coverage = r.all_territory ? 100 : Math.round((r.manzanas_done?.length||0)/(r.total_manzanas||1)*100);
+      const doneManzanas = new Set((r.manzanas_done||[]).map(m => m.toLowerCase()));
+      const svgHtml = t?.svg_data
+        ? buildPreviewSvg(t.svg_data, t.manzanas||[], doneManzanas, r.all_territory)
+        : renderReportTiles(t?.manzanas||[], doneManzanas, r.all_territory);
+      return `
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:13px;color:#0f0f0f">${r.territory_num}</div>
+        <div style="width:100%;display:flex;align-items:center;justify-content:center;min-height:120px">${svgHtml}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:600;color:${coverage===100?'var(--green)':'var(--gold)'}">${coverage}%</span>
+          <span class="progress-bar" style="width:48px"><span class="progress-fill" style="width:${coverage}%;background:${coverage===100?'var(--green)':'var(--gold)'}"></span></span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center">
+          ${r.all_territory ? '<span class="badge badge-green" style="font-size:10px">Completo</span>' : (r.manzanas_done||[]).map(m=>`<span class="badge badge-gold" style="font-size:10px">${m}</span>`).join(' ')}
+        </div>
+        <button onclick="deleteReport('${r.id}')" title="Eliminar"
+          style="background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-dim);padding:3px 10px;font-size:11px;transition:all .15s"
+          onmouseover="this.style.color='var(--red)';this.style.borderColor='var(--red)'"
+          onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)'">Eliminar</button>
+      </div>`;
+    }).join(`<div style="width:1px;background:var(--border);align-self:stretch;margin:0 4px"></div>`);
 
     return `
     <div class="report-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border)'">
-      <!-- Header -->
-      <div style="padding:16px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:32px;height:32px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:14px;color:#0f0f0f;flex-shrink:0">${r.territory_num}</div>
-          <div>
-            <div style="font-weight:600;font-size:14px">${r.host_name}</div>
-            <div style="font-size:11px;color:var(--text-muted)">${formatDate(r.created_at)}</div>
-          </div>
+      <div style="padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:600;font-size:14px">${hostName}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${formatDate(latestDate)}</div>
         </div>
-        <button onclick="deleteReport('${r.id}')" title="Eliminar reporte"
-          style="background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px 8px;border-radius:6px;font-size:16px;line-height:1;transition:color .15s,background .15s;flex-shrink:0"
-          onmouseover="this.style.color='var(--red)';this.style.background='rgba(224,92,92,0.1)'"
-          onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">✕</button>
+        <span class="badge badge-green" style="font-size:11px">✓ Enviado</span>
       </div>
-
-      <!-- SVG preview -->
-      <div style="padding:16px;background:var(--surface2);display:flex;align-items:center;justify-content:center;min-height:160px">
-        ${svgHtml}
-      </div>
-
-      <!-- Footer -->
-      <div style="padding:12px 18px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:12px;color:var(--text-muted)">
-          ${r.all_territory ? '<span class="badge badge-green">Territorio completo</span>' : `<span style="font-size:12px;color:var(--text-muted)">${(r.manzanas_done||[]).join(', ')}</span>`}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;font-weight:600;color:${coverage===100?'var(--green)':'var(--gold)'}">${coverage}%</span>
-          <span class="progress-bar" style="width:60px"><span class="progress-fill" style="width:${coverage}%;background:${coverage===100?'var(--green)':'var(--gold)'}"></span></span>
-        </div>
+      <div style="padding:16px;background:var(--surface2);display:flex;gap:8px;align-items:flex-start">
+        ${mapsHtml}
       </div>
     </div>`;
   }).join('');
 }
 
-function renderReportSvg(svgData, allManzanas, doneManzanas, allDone) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(svgData, 'image/svg+xml');
-  const svg = doc.querySelector('svg');
-  if (!svg) return renderReportTiles(allManzanas, doneManzanas, allDone);
 
-  svg.removeAttribute('width');
-  svg.removeAttribute('height');
-  svg.style.width = '100%';
-  svg.style.maxHeight = '180px';
-
-  const manzanaSet = new Set(allManzanas.map(m => m.toLowerCase()));
-
-  // Find groups matching manzana letters
-  const matched = new Map();
-  svg.querySelectorAll('g[id]').forEach(g => {
-    const gId = g.getAttribute('id').toLowerCase();
-    if (manzanaSet.has(gId)) matched.set(gId, g);
-  });
-
-  // Fallback: paths like id="a_2"
-  if (matched.size === 0) {
-    svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
-      const elId = el.getAttribute('id').toLowerCase();
-      allManzanas.forEach(m => {
-        const ml = m.toLowerCase();
-        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) {
-          matched.set(ml, el);
-        }
-      });
-    });
-  }
-
-  matched.forEach((el, letter) => {
-    const isDone = allDone || doneManzanas.has(letter);
-    const fillEl = el.tagName.toLowerCase() === 'g'
-      ? (el.querySelector('[id$="_2"]') || el.querySelector('path, polygon'))
-      : el;
-    if (!fillEl) return;
-
-    // Keep original fill for unselected, green for done
-    const originalFill = fillEl.getAttribute('fill');
-    if (isDone) {
-      fillEl.setAttribute('fill', '#22c55e');
-      fillEl.removeAttribute('fill-opacity');
-    } else {
-      // Keep original color but dim it with opacity
-      if (originalFill) fillEl.setAttribute('fill', originalFill);
-      fillEl.setAttribute('fill-opacity', '0.3');
-    }
-    // Label contrast
-    const labelPath = el.querySelector('[id$="_3"]');
-    if (labelPath) {
-      labelPath.setAttribute('fill', isDone ? '#ffffff' : (labelPath.getAttribute('fill') || '#000000'));
-      if (!isDone) labelPath.setAttribute('fill-opacity', '0.35');
-      else labelPath.removeAttribute('fill-opacity');
-    }
-  });
-
-  // Serialize back to string
-  const serializer = new XMLSerializer();
-  return serializer.serializeToString(svg);
-}
 
 function renderReportTiles(allManzanas, doneManzanas, allDone) {
   if (!allManzanas.length) return '<p style="color:var(--text-muted);font-size:12px">Sin manzanas configuradas</p>';
@@ -1214,7 +1209,7 @@ async function loadTerritories() {
   territories.forEach(t => tMap[t.number] = t);
 
   const grid = document.getElementById('territories-grid');
-  grid.innerHTML = Array.from({length:37}, (_,i) => i+1).map(n => {
+  grid.innerHTML = Array.from({length:36}, (_,i) => i+1).map(n => {
     const t = tMap[n];
     const mcount = t?.manzanas?.length || 0;
     const hasSvg = !!t?.svg_data;
@@ -1282,7 +1277,7 @@ let currentSvgData = null;
 let currentTerritoryId = null;
 
 async function openTerritoryModal(num) {
-  currentTerritoryNum = num;
+  hostCurrentTerritory = num;
   currentManzanas = [];
   currentSvgData = null;
   currentTerritoryId = null;
@@ -1390,27 +1385,37 @@ async function saveTerritory() {
 
 // ── CREATE FORM ──
 async function populateTerritorySelect() {
-  const sel = document.getElementById('cf-territory');
-  sel.innerHTML = '<option value="">Seleccionar...</option>';
-  for (let i = 1; i <= 37; i++) {
-    sel.innerHTML += `<option value="${i}">Territorio ${i}</option>`;
+  for (let slot = 1; slot <= 3; slot++) {
+    const sel = document.getElementById(`cf-territory-${slot}`);
+    if (!sel) continue;
+    const isRequired = slot === 1;
+    sel.innerHTML = `<option value="">${isRequired ? 'Seleccionar territorio...' : 'Opcional'}</option>`;
+    for (let i = 1; i <= 36; i++) {
+      sel.innerHTML += `<option value="${i}">Territorio ${i}</option>`;
+    }
   }
 }
 
 async function createForm() {
   const host = document.getElementById('cf-host').value.trim();
-  const territory = document.getElementById('cf-territory').value;
   const date = document.getElementById('cf-date').value;
   const notes = document.getElementById('cf-notes').value.trim();
+  const t1 = document.getElementById('cf-territory-1').value;
+  const t2 = document.getElementById('cf-territory-2').value;
+  const t3 = document.getElementById('cf-territory-3').value;
 
-  if (!host || !territory || !date) { toast('Completa todos los campos obligatorios', 'error'); return; }
+  const territories = [t1, t2, t3].filter(Boolean).map(Number);
+  if (!host || !date || !territories.length) { toast('Completa los campos obligatorios y selecciona al menos un territorio', 'error'); return; }
+
+  // Check for duplicates
+  if (new Set(territories).size !== territories.length) { toast('No puedes asignar el mismo territorio dos veces', 'error'); return; }
 
   const btn = document.getElementById('btn-create-form');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> Generando...';
 
   const token = genToken();
-  const payload = { host_name: host, territory_num: parseInt(territory), assignment_date: date, notes: notes || null, token };
+  const payload = { host_name: host, territory_nums: territories, assignment_date: date, notes: notes || null, token };
 
   try {
     const res = await sb('territory_forms', { method:'POST', body: JSON.stringify(payload), prefer: 'return=representation' });
@@ -1421,10 +1426,9 @@ async function createForm() {
       const link = `${base}?token=${token}`;
       document.getElementById('created-link-url').textContent = link;
       document.getElementById('created-link-box').classList.remove('hidden');
-      // Reset form fields but keep link visible
       document.getElementById('cf-host').value = '';
       document.getElementById('cf-notes').value = '';
-      document.getElementById('cf-territory').value = '';
+      for (let i = 1; i <= 3; i++) document.getElementById(`cf-territory-${i}`).value = '';
       document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
       toast('¡Formulario creado!');
       loadForms(); loadDashboard();
@@ -1451,17 +1455,15 @@ function toggleCreateForm() {
   const isHidden = box.classList.contains('hidden');
   box.classList.toggle('hidden');
   if (isHidden) {
-    // Opening — populate select and set today's date
     populateTerritorySelect();
     document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('created-link-box').classList.add('hidden');
     document.getElementById('cf-host').focus();
   } else {
-    // Closing — reset fields
     document.getElementById('created-link-box').classList.add('hidden');
     document.getElementById('cf-host').value = '';
     document.getElementById('cf-notes').value = '';
-    document.getElementById('cf-territory').value = '';
+    for (let i = 1; i <= 3; i++) { const s = document.getElementById(`cf-territory-${i}`); if(s) s.value = ''; }
     document.getElementById('cf-date').value = '';
   }
 }
@@ -1470,105 +1472,207 @@ function toggleCreateForm() {
 // HOST SCREEN
 // ════════════════════════════════════════
 let hostFormData = null;
-let hostTerritoryData = null;
+let hostTerritoriesData = {}; // num → territory config
+let hostReportedNums = new Set(); // territory_nums already reported in this session
+let hostCurrentTerritory = null; // which territory is being reported right now
 let selectedManzanas = [];
 let allSelected = false;
 
 async function initHostScreen(token) {
-  // Load form
   const fRes = await sb(`territory_forms?token=eq.${token}&select=*`, { method:'GET' });
   const forms = await fRes.json();
-  if (!forms.length) { document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace inválido</h2><p>Este enlace no existe o ha expirado.</p></div></div>'; return; }
+  if (!forms.length) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100dvh;color:var(--text-muted);font-family:Instrument Sans,sans-serif;text-align:center;padding:20px"><div><h2 style="font-family:DM Serif Display,serif;font-size:28px;margin-bottom:8px">Enlace inválido</h2><p>Este enlace no existe o ha expirado.</p></div></div>';
+    return;
+  }
   hostFormData = forms[0];
 
-  // Check if already submitted
-  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=id`, { method:'GET' });
+  // Support both old (territory_num) and new (territory_nums) schema
+  const nums = hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
+
+  // Load already-submitted reports for this form
+  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=territory_num`, { method:'GET' });
   const existing = await rRes.json();
-  if (existing.length) {
-    show('host-screen');
-    hostStep(3, true);
+  hostReportedNums = new Set(existing.map(r => r.territory_num));
+
+  // Load territory configs for all assigned nums
+  if (nums.length) {
+    const tRes = await sb(`territories?number=in.(${nums.join(',')})&select=*`, { method:'GET' });
+    const tArr = await tRes.json();
+    tArr.forEach(t => hostTerritoriesData[t.number] = t);
+  }
+
+  document.getElementById('host-name-display').textContent = hostFormData.host_name;
+  show('host-screen');
+  renderHostOverview();
+}
+
+function renderHostOverview() {
+  const nums = hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
+  const pending = nums.filter(n => !hostReportedNums.has(n));
+  const allDone = pending.length === 0;
+
+  const sub = document.getElementById('host-welcome-sub');
+  const cardsEl = document.getElementById('host-territory-cards');
+  const allDoneEl = document.getElementById('host-all-done');
+
+  // Show all steps hidden, step-0 visible
+  [1,2].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
+  document.getElementById('host-step-0').classList.remove('hidden');
+
+  if (allDone) {
+    sub.classList.add('hidden');
+    cardsEl.innerHTML = '';
+    allDoneEl.classList.remove('hidden');
     return;
   }
 
-  // Load territory
-  const tRes = await sb(`territories?number=eq.${hostFormData.territory_num}&select=*`, { method:'GET' });
-  const territories = await tRes.json();
-  hostTerritoryData = territories[0] || { number: hostFormData.territory_num, manzanas: [], svg_data: null };
+  allDoneEl.classList.add('hidden');
+  sub.classList.remove('hidden');
+  sub.textContent = pending.length === 1
+    ? 'Toca el territorio para reportarlo.'
+    : 'Toca un territorio para reportarlo.';
 
-  // Set UI
-  document.getElementById('host-territory-num').textContent = hostFormData.territory_num;
-  document.getElementById('host-name-display').textContent = hostFormData.host_name;
-  document.getElementById('host-sel-num').textContent = hostFormData.territory_num;
-  document.getElementById('host-sel-territory').textContent = hostFormData.territory_num;
+  cardsEl.innerHTML = nums.map(n => {
+    const done = hostReportedNums.has(n);
+    const t = hostTerritoriesData[n];
+    const svgHtml = t?.svg_data ? buildPreviewSvg(t.svg_data, t.manzanas || [], new Set(), false, true) : '';
 
-  show('host-screen');
+    return `
+    <div onclick="${done ? '' : `startReporting(${n})`}"
+      style="
+        background:var(--surface);border:1px solid ${done ? 'var(--green)' : 'var(--border)'};
+        border-radius:var(--radius);overflow:hidden;
+        transition:border-color .2s,transform .15s,opacity .2s;
+        cursor:${done ? 'default' : 'pointer'};
+        opacity:${done ? '0.65' : '1'};
+      "
+      ${!done ? `onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'"` : ''}>
+      <!-- Card header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;background:${done ? 'var(--green)' : 'var(--gold)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#0f0f0f;flex-shrink:0">${n}</div>
+          <span style="font-weight:600;font-size:15px">Territorio ${n}</span>
+        </div>
+        ${done
+          ? '<span class="badge badge-green" style="font-size:11px">✓ Enviado</span>'
+          : '<span style="font-size:12px;color:var(--text-muted)">Toca para reportar →</span>'}
+      </div>
+      <!-- SVG preview if available -->
+      ${svgHtml ? `<div style="padding:0 16px 14px;display:flex;justify-content:center;max-height:140px;overflow:hidden">${svgHtml}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
-function hostStep(step, alreadySent = false) {
-  [0,1,2,3].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
-  document.getElementById(`host-step-${step}`)?.classList.remove('hidden');
-
-  if (step === 1) {
-    selectedManzanas = [];
-    allSelected = false;
-    document.getElementById('all-toggle').classList.remove('on');
-    renderTerritoryMap();
-    updateContinueBtn();
-  }
-  if (step === 2) {
-    renderConfirmStep();
-  }
-  if (step === 3) {
-    const tNum = hostFormData?.territory_num || '–';
-    if (alreadySent) {
-      document.getElementById('sent-title').textContent = `Territorio ${tNum} – ya enviado`;
-    } else {
-      const label = allSelected ? `Territorio ${tNum} completado` : `Territorio ${tNum} – ${selectedManzanas.join(', ')}`;
-      document.getElementById('sent-title').textContent = label;
-    }
-  }
-}
-
-function renderTerritoryMap() {
-  const container = document.getElementById('svg-container');
-  const manzanas = hostTerritoryData?.manzanas || [];
-
-  if (!hostTerritoryData?.svg_data) { renderFallbackMap(container, manzanas); return; }
-
+function buildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, neutralMode = false) {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(hostTerritoryData.svg_data, 'image/svg+xml');
+  const doc = parser.parseFromString(svgData, 'image/svg+xml');
   const svg = doc.querySelector('svg');
-  if (!svg) { renderFallbackMap(container, manzanas); return; }
-
+  if (!svg) return '';
   svg.removeAttribute('width');
   svg.removeAttribute('height');
   svg.style.width = '100%';
-  svg.style.height = '100%';
-  svg.style.maxHeight = '320px';
+  svg.style.maxHeight = '130px';
+  svg.style.pointerEvents = 'none';
+
+  const manzanaSet = new Set(allManzanas.map(m => m.toLowerCase()));
+  const matched = new Map();
+  svg.querySelectorAll('g[id]').forEach(g => {
+    if (manzanaSet.has(g.getAttribute('id').toLowerCase())) matched.set(g.getAttribute('id').toLowerCase(), g);
+  });
+  if (matched.size === 0) {
+    svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+      const elId = el.getAttribute('id').toLowerCase();
+      allManzanas.forEach(m => {
+        const ml = m.toLowerCase();
+        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_'))) matched.set(ml, el);
+      });
+    });
+  }
+
+  if (!neutralMode) {
+    matched.forEach((el, letter) => {
+      const isDone = allDone || doneManzanas.has(letter);
+      const fillEl = el.tagName.toLowerCase() === 'g' ? (el.querySelector('[id$="_2"]') || el.querySelector('path,polygon')) : el;
+      if (!fillEl) return;
+      const orig = fillEl.getAttribute('fill');
+      if (isDone) { fillEl.setAttribute('fill', '#22c55e'); fillEl.removeAttribute('fill-opacity'); }
+      else { if (orig) fillEl.setAttribute('fill', orig); fillEl.setAttribute('fill-opacity', '0.3'); }
+      const lbl = el.querySelector('[id$="_3"]');
+      if (lbl) { lbl.setAttribute('fill', isDone ? '#fff' : (lbl.getAttribute('fill') || '#000')); if (!isDone) lbl.setAttribute('fill-opacity','0.35'); else lbl.removeAttribute('fill-opacity'); }
+    });
+  } else {
+    // neutral: just remove fill-opacity overrides
+    svg.querySelectorAll('path,polygon').forEach(el => el.removeAttribute('fill-opacity'));
+  }
+
+  return new XMLSerializer().serializeToString(svg);
+}
+
+function startReporting(num) {
+  hostCurrentTerritory = num;
+  selectedManzanas = [];
+  allSelected = false;
+
+  const t = hostTerritoriesData[num] || { number: num, manzanas: [], svg_data: null };
+
+  document.getElementById('host-sel-num').textContent = num;
+  document.getElementById('host-sel-territory').textContent = num;
+
+  document.getElementById('host-step-0').classList.add('hidden');
+  document.getElementById('host-step-1').classList.remove('hidden');
+  document.getElementById('host-step-2').classList.add('hidden');
+
+  document.getElementById('all-toggle').classList.remove('on');
+  renderTerritoryMap(t);
+  updateContinueBtn();
+}
+
+function hostStep(step) {
+  document.getElementById('host-step-0').classList.add('hidden');
+  document.getElementById('host-step-1').classList.add('hidden');
+  document.getElementById('host-step-2').classList.add('hidden');
+
+  if (step === 0) {
+    renderHostOverview();
+  } else if (step === 1) {
+    document.getElementById('host-step-1').classList.remove('hidden');
+  } else if (step === 2) {
+    document.getElementById('host-step-2').classList.remove('hidden');
+    renderConfirmStep();
+  }
+}
+
+function renderTerritoryMap(t) {
+  const container = document.getElementById('svg-container');
+  const manzanas = t?.manzanas || [];
+
+  if (!t?.svg_data) { renderFallbackMap(container, manzanas); return; }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  if (!svg) { renderFallbackMap(container, manzanas); return; }
+
+  svg.removeAttribute('width'); svg.removeAttribute('height');
+  svg.style.width = '100%'; svg.style.height = '100%'; svg.style.maxHeight = '320px';
 
   const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
   const matched = new Map();
 
-  // Strategy 1: <g id="a">, <g id="b"> groups
   svg.querySelectorAll('g[id]').forEach(g => {
     const gId = g.getAttribute('id').toLowerCase();
     if (manzanaSet.has(gId)) matched.set(gId, g);
   });
-
-  // Strategy 2: paths like id="a_2", id="b_2"
   if (matched.size === 0) {
     svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
       const elId = el.getAttribute('id').toLowerCase();
       manzanas.forEach(m => {
         const ml = m.toLowerCase();
-        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) {
-          matched.set(ml, el);
-        }
+        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) matched.set(ml, el);
       });
     });
   }
-
-  // Strategy 3: positional fallback
   if (matched.size === 0) {
     Array.from(svg.querySelectorAll('path, polygon')).forEach((p, i) => {
       if (i < manzanas.length) matched.set(manzanas[i].toLowerCase(), p);
@@ -1577,41 +1681,31 @@ function renderTerritoryMap() {
 
   matched.forEach((el, letter) => {
     const mName = manzanas.find(m => m.toLowerCase() === letter) || letter.toUpperCase();
-    const fillEl = el.tagName.toLowerCase() === 'g'
-      ? (el.querySelector('[id$="_2"]') || el.querySelector('path, polygon'))
-      : el;
+    const fillEl = el.tagName.toLowerCase() === 'g' ? (el.querySelector('[id$="_2"]') || el.querySelector('path, polygon')) : el;
     if (!fillEl) return;
 
-    // Save original color to restore on deselect
     const originalFill = fillEl.getAttribute('fill') || '#e8b84b';
     fillEl._originalFill = originalFill;
-
-    // Smooth color transition
     fillEl.style.transition = 'fill 0.18s ease';
     el.style.cursor = 'pointer';
     el._fillEl = fillEl;
-
-    // Scale animation on the group/element via CSS transform
     el.style.transformOrigin = 'center';
     el.style.transition = 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
     const onTap = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       if (selectedManzanas.includes(mName)) {
-        // Deselect — restore original color, no scale
         selectedManzanas = selectedManzanas.filter(x => x !== mName);
         fillEl.setAttribute('fill', originalFill);
         fillEl.removeAttribute('fill-opacity');
         el.style.transform = 'scale(1)';
       } else {
-        // Select — green + scale up
         selectedManzanas.push(mName);
         fillEl.setAttribute('fill', '#22c55e');
         fillEl.removeAttribute('fill-opacity');
         el.style.transform = 'scale(1.08)';
       }
-      updateAllToggleState();
+      updateAllToggleState(manzanas);
       updateContinueBtn();
     };
     el.addEventListener('click', onTap);
@@ -1619,12 +1713,12 @@ function renderTerritoryMap() {
   });
 
   container._matchedGroups = matched;
+  container._currentManzanas = manzanas;
   container.innerHTML = '';
   container.appendChild(svg);
 }
 
 function renderFallbackMap(container, manzanas) {
-  // Render manzanas as tappable tiles
   if (!manzanas.length) {
     container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;text-align:center">Sin manzanas configuradas para este territorio</p>';
     return;
@@ -1639,84 +1733,42 @@ function renderFallbackMap(container, manzanas) {
   </div>`;
 }
 
-function toggleManzana(mName, element) {
-  if (!mName) return;
-  if (selectedManzanas.includes(mName)) {
-    selectedManzanas = selectedManzanas.filter(x => x !== mName);
-    element.style.fill = '#c49a2e';
-  } else {
-    selectedManzanas.push(mName);
-    element.style.fill = '#4caf7d';
-  }
-  updateAllToggleState();
-  updateContinueBtn();
-}
-
 function toggleManzanaTile(el, mName) {
   if (selectedManzanas.includes(mName)) {
     selectedManzanas = selectedManzanas.filter(x => x !== mName);
-    el.style.background = 'var(--gold-dim)';
-    el.style.borderColor = 'transparent';
-    el.style.color = '#0f0f0f';
-    el.style.transform = 'scale(1)';
+    el.style.background = 'var(--gold-dim)'; el.style.borderColor = 'transparent';
+    el.style.color = '#0f0f0f'; el.style.transform = 'scale(1)';
   } else {
     selectedManzanas.push(mName);
-    el.style.background = '#22c55e';
-    el.style.borderColor = '#22c55e';
-    el.style.color = '#fff';
-    el.style.transform = 'scale(1.08)';
+    el.style.background = '#22c55e'; el.style.borderColor = '#22c55e';
+    el.style.color = '#fff'; el.style.transform = 'scale(1.08)';
   }
-  updateAllToggleState();
+  const manzanas = document.getElementById('svg-container')._currentManzanas || [];
+  updateAllToggleState(manzanas);
   updateContinueBtn();
 }
 
-function updateAllToggleState() {
-  const manzanas = hostTerritoryData?.manzanas || [];
+function updateAllToggleState(manzanas) {
+  if (!manzanas) manzanas = document.getElementById('svg-container')._currentManzanas || [];
   allSelected = manzanas.length > 0 && manzanas.every(m => selectedManzanas.includes(m));
   document.getElementById('all-toggle').classList.toggle('on', allSelected);
 }
 
 function toggleAll() {
-  const manzanas = hostTerritoryData?.manzanas || [];
+  const manzanas = document.getElementById('svg-container')._currentManzanas || [];
   allSelected = !allSelected;
   document.getElementById('all-toggle').classList.toggle('on', allSelected);
-
   const container = document.getElementById('svg-container');
   const matchedGroups = container._matchedGroups;
 
   if (allSelected) {
     selectedManzanas = [...manzanas];
-    if (matchedGroups) {
-      matchedGroups.forEach((el) => {
-        const fillEl = el._fillEl || el;
-        fillEl.setAttribute('fill', '#22c55e');
-        fillEl.removeAttribute('fill-opacity');
-        el.style.transform = 'scale(1.08)';
-      });
-    }
-    container.querySelectorAll('.manzana-tile').forEach(el => {
-      el.style.background = 'var(--green)';
-      el.style.borderColor = 'var(--green)';
-      el.style.color = '#fff';
-      el.style.transform = 'scale(1.08)';
-    });
+    if (matchedGroups) matchedGroups.forEach(el => { const f = el._fillEl||el; f.setAttribute('fill','#22c55e'); f.removeAttribute('fill-opacity'); el.style.transform='scale(1.08)'; });
+    container.querySelectorAll('.manzana-tile').forEach(el => { el.style.background='var(--green)'; el.style.borderColor='var(--green)'; el.style.color='#fff'; el.style.transform='scale(1.08)'; });
   } else {
     selectedManzanas = [];
-    if (matchedGroups) {
-      matchedGroups.forEach((el) => {
-        const fillEl = el._fillEl || el;
-        // Restore original color saved during render
-        fillEl.setAttribute('fill', fillEl._originalFill || '#e8b84b');
-        fillEl.removeAttribute('fill-opacity');
-        el.style.transform = 'scale(1)';
-      });
-    }
-    container.querySelectorAll('.manzana-tile').forEach(el => {
-      el.style.background = 'var(--gold-dim)';
-      el.style.borderColor = 'transparent';
-      el.style.color = '#0f0f0f';
-      el.style.transform = 'scale(1)';
-    });
+    if (matchedGroups) matchedGroups.forEach(el => { const f = el._fillEl||el; f.setAttribute('fill', f._originalFill||'#e8b84b'); f.removeAttribute('fill-opacity'); el.style.transform='scale(1)'; });
+    container.querySelectorAll('.manzana-tile').forEach(el => { el.style.background='var(--gold-dim)'; el.style.borderColor='transparent'; el.style.color='#0f0f0f'; el.style.transform='scale(1)'; });
   }
   updateContinueBtn();
 }
@@ -1726,19 +1778,18 @@ function updateContinueBtn() {
 }
 
 function renderConfirmStep() {
-  const tNum = hostFormData.territory_num;
-  const manzanas = hostTerritoryData?.manzanas || [];
-  document.getElementById('confirm-num').textContent = tNum;
+  const t = hostTerritoriesData[hostCurrentTerritory] || {};
+  const manzanas = t.manzanas || [];
+  const isAll = allSelected || selectedManzanas.length === manzanas.length;
 
-  if (allSelected || selectedManzanas.length === manzanas.length) {
-    document.getElementById('confirm-title').textContent = `Territorio ${tNum} completado`;
-    document.getElementById('confirm-subtitle').textContent = '¿Quieres enviar tu reporte?';
-    document.getElementById('confirm-manzanas-list').innerHTML = '<span class="badge badge-green" style="padding:6px 16px;font-size:13px">Territorio completo ✓</span>';
-  } else {
-    document.getElementById('confirm-title').textContent = `Territorio ${tNum} – ${selectedManzanas.join(', ')}`;
-    document.getElementById('confirm-subtitle').textContent = '¿Quieres enviar tu reporte?';
-    document.getElementById('confirm-manzanas-list').innerHTML = selectedManzanas.map(m => `<span class="confirm-manzana">${m}</span>`).join('');
-  }
+  document.getElementById('confirm-num').textContent = hostCurrentTerritory;
+  document.getElementById('confirm-title').textContent = isAll
+    ? `Territorio ${hostCurrentTerritory} completado`
+    : `Territorio ${hostCurrentTerritory} – ${selectedManzanas.join(', ')}`;
+  document.getElementById('confirm-subtitle').textContent = '¿Quieres enviar tu reporte?';
+  document.getElementById('confirm-manzanas-list').innerHTML = isAll
+    ? '<span class="badge badge-green" style="padding:6px 16px;font-size:13px">Territorio completo ✓</span>'
+    : selectedManzanas.map(m => `<span class="confirm-manzana">${m}</span>`).join('');
 }
 
 async function submitReport() {
@@ -1746,13 +1797,14 @@ async function submitReport() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div>';
 
-  const manzanas = hostTerritoryData?.manzanas || [];
+  const t = hostTerritoriesData[hostCurrentTerritory] || {};
+  const manzanas = t.manzanas || [];
   const isAll = allSelected || selectedManzanas.length === manzanas.length;
 
   const payload = {
     form_id: hostFormData.id,
     host_name: hostFormData.host_name,
-    territory_num: hostFormData.territory_num,
+    territory_num: hostCurrentTerritory,
     manzanas_done: isAll ? manzanas : selectedManzanas,
     all_territory: isAll,
     total_manzanas: manzanas.length
@@ -1760,7 +1812,9 @@ async function submitReport() {
 
   const res = await sb('territory_reports', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
   if (res.ok) {
-    hostStep(3);
+    hostReportedNums.add(hostCurrentTerritory);
+    // Back to overview — which will show remaining or all-done
+    renderHostOverview();
   } else {
     toast('Error al enviar. Intenta de nuevo.', 'error');
     btn.disabled = false;
