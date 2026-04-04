@@ -673,8 +673,22 @@
   </div>
 
   <!-- Step 1: Select manzanas -->
-  <div id="host-step-1" class="host-select hidden">
-    <div class="host-select-header">
+  <div id="host-step-1" class="host-select hidden" style="position:relative">
+    <!-- Floating back button top-left -->
+    <button onclick="hostStep(0)" style="
+      position:absolute;top:0;left:0;
+      width:40px;height:40px;border-radius:50%;border:1px solid var(--border);
+      background:var(--surface);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      color:var(--text-muted);transition:all .15s;
+      box-shadow:0 2px 10px rgba(0,0,0,0.12);z-index:10;
+    "
+    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="host-select-header" style="padding-left:52px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
         <div class="territory-num" id="host-sel-num">5</div>
         <h2 style="font-family:'DM Serif Display',serif;font-size:22px">Territorio <span id="host-sel-territory"></span></h2>
@@ -689,11 +703,8 @@
       <div class="toggle" id="all-toggle" onclick="toggleAll()"></div>
     </div>
 
-    <div class="host-actions" style="display:flex;gap:10px">
-      <button class="btn btn-ghost" onclick="hostStep(0)" style="flex:0 0 auto;padding:15px 18px">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="btn btn-gold" id="btn-continue" onclick="hostStep(2)" disabled style="flex:1;justify-content:center;padding:15px">
+    <div class="host-actions">
+      <button class="btn btn-gold" id="btn-continue" onclick="hostStep(2)" disabled style="width:100%;justify-content:center;padding:15px;font-size:15px">
         Continuar
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </button>
