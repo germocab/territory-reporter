@@ -1439,14 +1439,19 @@ async function deleteTerritory(id, num) {
 }
 // ── CREATE FORM ──
 async function populateTerritorySelect() {
+  const res = await sb('territories?select=number,name&order=number.asc', { method:'GET' });
+  let territories = await res.json();
+  if (!Array.isArray(territories)) territories = [];
+
   for (let slot = 1; slot <= 3; slot++) {
     const sel = document.getElementById(`cf-territory-${slot}`);
     if (!sel) continue;
     const isRequired = slot === 1;
     sel.innerHTML = `<option value="">${isRequired ? 'Seleccionar territorio...' : 'Opcional'}</option>`;
-    for (let i = 1; i <= 36; i++) {
-      sel.innerHTML += `<option value="${i}">Territorio ${i}</option>`;
-    }
+    territories.forEach(t => {
+      const label = t.name ? `Territorio ${t.number} – ${t.name}` : `Territorio ${t.number}`;
+      sel.innerHTML += `<option value="${t.number}">${label}</option>`;
+    });
   }
 }
 
