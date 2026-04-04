@@ -688,9 +688,8 @@
 
   <div id="host-step-1" class="host-select hidden">
     <div class="host-select-header" style="padding-top:8px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <div class="territory-num" id="host-sel-num">5</div>
-        <h2 style="font-family:'DM Serif Display',serif;font-size:22px">Territorio <span id="host-sel-territory"></span></h2>
+      <div style="margin-bottom:4px">
+        <h2 style="font-family:'DM Serif Display',serif;font-size:28px">Territorio <span id="host-sel-territory"></span></h2>
       </div>
       <p style="color:var(--text-muted);font-size:13px">Selecciona las manzanas abarcadas</p>
     </div>
@@ -717,7 +716,6 @@
       Volver
     </div>
     <div class="confirm-summary">
-      <div class="territory-num-sm" id="confirm-num">5</div>
       <h3 id="confirm-title">Territorio 5 completado</h3>
       <p class="subtitle" id="confirm-subtitle">¿Quieres enviar tu reporte?</p>
       <div class="confirm-manzanas" id="confirm-manzanas-list"></div>
@@ -1653,22 +1651,43 @@ function buildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, neutralMod
   return new XMLSerializer().serializeToString(svg);
 }
 
-// Palette of accent colors for each territory slot (index 0, 1, 2)
-const TERRITORY_COLORS = ['#e8b84b', '#5b9cf6', '#a78bfa'];
+// Extract the dominant fill color from a territory's SVG data
+function extractTerritoryColor(t) {
+  if (!t?.svg_data) return '#e8b84b'; // fallback gold
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+    const svg = doc.querySelector('svg');
+    if (!svg) return '#e8b84b';
+    const manzanas = t.manzanas || [];
+    const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
+
+    // Try to find a manzana fill element (same logic as renderTerritoryMap)
+    let fillEl = null;
+    svg.querySelectorAll('g[id]').forEach(g => {
+      if (fillEl) return;
+      if (manzanaSet.has(g.getAttribute('id').toLowerCase())) {
+        fillEl = g.querySelector('[id$="_2"]') || g.querySelector('path, polygon');
+      }
+    });
+    if (!fillEl) {
+      svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+        if (fillEl) return;
+        const elId = el.getAttribute('id').toLowerCase();
+        if ([...manzanaSet].some(m => elId === m || elId.startsWith(m + '_') || elId.startsWith(m + '-'))) {
+          fillEl = el;
+        }
+      });
+    }
+    if (!fillEl) fillEl = svg.querySelector('path, polygon');
+    const fill = fillEl?.getAttribute('fill');
+    return (fill && fill !== 'none' && fill !== 'transparent') ? fill : '#e8b84b';
+  } catch (e) { return '#e8b84b'; }
+}
 
 function applyTerritoryColor(num) {
-  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
-  const idx = nums.indexOf(num);
-  const color = TERRITORY_COLORS[idx >= 0 ? idx : 0];
-  document.getElementById('host-screen').style.setProperty('--territory-color', color);
-
-  // Apply to territory number badge (step 1 header)
-  const selNum = document.getElementById('host-sel-num');
-  if (selNum) selNum.style.background = color;
-
-  // Apply to confirm badge (step 2)
-  const confirmNum = document.getElementById('confirm-num');
-  if (confirmNum) confirmNum.style.background = color;
+  const t = hostTerritoriesData[num];
+  const color = extractTerritoryColor(t);
 
   // Apply to Continue button (step 1)
   const btnContinue = document.getElementById('btn-continue');
@@ -1687,7 +1706,6 @@ function startReporting(num) {
   const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
   const t = hostTerritoriesData[num] || { number: num, manzanas: [], svg_data: null };
 
-  document.getElementById('host-sel-num').textContent = num;
   document.getElementById('host-sel-territory').textContent = num;
 
   document.getElementById('host-step-0').classList.add('hidden');
@@ -1865,7 +1883,6 @@ function renderConfirmStep() {
   const manzanas = t.manzanas || [];
   const isAll = allSelected || selectedManzanas.length === manzanas.length;
 
-  document.getElementById('confirm-num').textContent = hostCurrentTerritory;
   document.getElementById('confirm-title').textContent = isAll
     ? `Territorio ${hostCurrentTerritory} completado`
     : `Territorio ${hostCurrentTerritory} – ${selectedManzanas.join(', ')}`;
