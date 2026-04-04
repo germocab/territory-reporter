@@ -1415,7 +1415,8 @@ async function createForm() {
   btn.innerHTML = '<div class="spinner"></div> Generando...';
 
   const token = genToken();
-  const payload = { host_name: host, territory_nums: territories, assignment_date: date, notes: notes || null, token };
+  // territory_num (singular) kept for backward compat; territory_nums is the new array
+  const payload = { host_name: host, territory_num: territories[0], territory_nums: territories, assignment_date: date, notes: notes || null, token };
 
   try {
     const res = await sb('territory_forms', { method:'POST', body: JSON.stringify(payload), prefer: 'return=representation' });
