@@ -460,6 +460,9 @@
   .host-fab svg { stroke: var(--text); }
   .host-theme-btn { right: 16px; }
   .host-back-btn  { left: 16px; }
+
+  /* Per-territory accent color — set dynamically via JS on the host-screen element */
+  #host-screen { --territory-color: var(--gold); }
 </style>
 </head>
 <body>
@@ -1650,11 +1653,38 @@ function buildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, neutralMod
   return new XMLSerializer().serializeToString(svg);
 }
 
+// Palette of accent colors for each territory slot (index 0, 1, 2)
+const TERRITORY_COLORS = ['#e8b84b', '#5b9cf6', '#a78bfa'];
+
+function applyTerritoryColor(num) {
+  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
+  const idx = nums.indexOf(num);
+  const color = TERRITORY_COLORS[idx >= 0 ? idx : 0];
+  document.getElementById('host-screen').style.setProperty('--territory-color', color);
+
+  // Apply to territory number badge (step 1 header)
+  const selNum = document.getElementById('host-sel-num');
+  if (selNum) selNum.style.background = color;
+
+  // Apply to confirm badge (step 2)
+  const confirmNum = document.getElementById('confirm-num');
+  if (confirmNum) confirmNum.style.background = color;
+
+  // Apply to Continue button (step 1)
+  const btnContinue = document.getElementById('btn-continue');
+  if (btnContinue) { btnContinue.style.background = color; btnContinue.style.color = '#0f0f0f'; }
+
+  // Apply to Submit button (step 2)
+  const btnSubmit = document.getElementById('btn-submit');
+  if (btnSubmit) { btnSubmit.style.background = color; btnSubmit.style.color = '#0f0f0f'; }
+}
+
 function startReporting(num) {
   hostCurrentTerritory = num;
   selectedManzanas = [];
   allSelected = false;
 
+  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
   const t = hostTerritoriesData[num] || { number: num, manzanas: [], svg_data: null };
 
   document.getElementById('host-sel-num').textContent = num;
@@ -1664,7 +1694,12 @@ function startReporting(num) {
   document.getElementById('host-step-1').classList.remove('hidden');
   document.getElementById('host-step-2').classList.add('hidden');
 
+  // Show back button only for multi-territory links
+  const backBtn = document.getElementById('host-back-btn');
+  if (backBtn) backBtn.classList.toggle('hidden', nums.length <= 1);
+
   document.getElementById('all-toggle').classList.remove('on');
+  applyTerritoryColor(num);
   renderTerritoryMap(t);
   updateContinueBtn();
 }
@@ -1673,17 +1708,20 @@ function hostStep(step) {
   document.getElementById('host-step-0').classList.add('hidden');
   document.getElementById('host-step-1').classList.add('hidden');
   document.getElementById('host-step-2').classList.add('hidden');
-  // Back button only visible on step 1, and only if >1 territory
+  // Back button visible on steps 1 & 2 only for multi-territory links
   const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
   const backBtn = document.getElementById('host-back-btn');
-  if (backBtn) backBtn.classList.toggle('hidden', step !== 1 || nums.length <= 1);
+  const isMulti = nums.length > 1;
+  if (backBtn) backBtn.classList.toggle('hidden', !isMulti || step === 0);
 
   if (step === 0) {
     renderHostOverview();
   } else if (step === 1) {
     document.getElementById('host-step-1').classList.remove('hidden');
+    applyTerritoryColor(hostCurrentTerritory);
   } else if (step === 2) {
     document.getElementById('host-step-2').classList.remove('hidden');
+    applyTerritoryColor(hostCurrentTerritory);
     renderConfirmStep();
   }
 }
