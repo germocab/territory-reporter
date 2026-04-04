@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Territorios 2.2.2</title>
+<title>Territorios</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -967,6 +967,10 @@ function showPanel(name) {
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.panel === name);
   });
+  if (name === 'forms') { loadForms(); populateTerritorySelect(); }
+  if (name === 'territories') loadTerritories();
+  if (name === 'reports') loadReports();
+  if (name === 'dashboard') loadDashboard();
 }
 
 // ── DASHBOARD ──
@@ -1461,7 +1465,7 @@ async function deleteTerritory(id, num) {
 }
 // ── CREATE FORM ──
 async function populateTerritorySelect() {
-  const res = await sb('territories?select=id,number,name&order=number.asc', { method:'GET' });
+  const res = await sb(`territories?select=id,number,name&order=number.asc&_=${Date.now()}`, { method:'GET', headers: { 'Cache-Control': 'no-cache' } });
   let territories = await res.json();
   if (!Array.isArray(territories)) territories = [];
 
@@ -1636,19 +1640,22 @@ function renderHostOverview() {
     // Hide the default h1 heading so we can render the full splash inside cardsEl
     const defaultHeading = document.querySelector('.host-welcome-name');
     if (defaultHeading) defaultHeading.classList.add('hidden');
+    const tSingle = hostTerritoriesData[n] || {};
+    const dispNumSingle = tSingle.number ?? n;
+    const dispNameSingle = tSingle.name || `Territorio ${dispNumSingle}`;
     cardsEl.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;width:100%">
         <div style="width:100px;height:100px;background:var(--gold);border-radius:28px;
           display:flex;align-items:center;justify-content:center;
           font-family:'DM Serif Display',serif;font-size:48px;color:#0f0f0f;
-          margin-bottom:32px;box-shadow:0 20px 60px rgba(232,184,75,0.3);">${n}</div>
+          margin-bottom:32px;box-shadow:0 20px 60px rgba(232,184,75,0.3);">${dispNumSingle}</div>
         <h1 style="font-family:'DM Serif Display',serif;font-size:32px;margin-bottom:8px">
           ¡Hola, <span style="color:var(--gold);font-style:italic">${hostFormData.host_name}</span>!
         </h1>
         <p style="color:var(--text-muted);font-size:15px;margin-bottom:36px;line-height:1.5">
           Envía tu informe del territorio<br>de hoy.
         </p>
-        <button class="btn btn-gold" onclick="startReporting(${n})"
+        <button class="btn btn-gold" onclick="startReporting('${n}')"
           style="padding:15px 40px;font-size:15px">
           Comenzar
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1669,11 +1676,13 @@ function renderHostOverview() {
 
   cardsEl.innerHTML = nums.map(n => {
     const done = hostReportedNums.has(n);
-    const t = hostTerritoriesData[n];  // n is id or number depending on form version
+    const t = hostTerritoriesData[n];
+    const dispNum = t?.number ?? n;
+    const dispName = t?.name || `Territorio ${dispNum}`;
     const svgHtml = t?.svg_data ? buildPreviewSvg(t.svg_data, t.manzanas || [], new Set(), false, true) : '';
 
     return `
-    <div onclick="${done ? '' : `startReporting(${n})`}"
+    <div onclick="${done ? '' : `startReporting('${n}')`}"
       style="
         background:var(--surface);border:1px solid ${done ? 'var(--green)' : 'var(--border)'};
         border-radius:var(--radius);overflow:hidden;
@@ -1685,8 +1694,8 @@ function renderHostOverview() {
       <!-- Card header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:34px;height:34px;background:${done ? 'var(--green)' : 'var(--gold)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#0f0f0f;flex-shrink:0">${n}</div>
-          <span style="font-weight:600;font-size:15px">Territorio ${n}</span>
+          <div style="width:34px;height:34px;background:${done ? 'var(--green)' : 'var(--gold)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#0f0f0f;flex-shrink:0">${dispNum}</div>
+          <span style="font-weight:600;font-size:15px">${dispName}</span>
         </div>
         ${done
           ? '<span class="badge badge-green" style="font-size:11px">✓ Enviado</span>'
