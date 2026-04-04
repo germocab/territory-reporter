@@ -632,9 +632,22 @@
       <p class="panel-title">Reportes</p>
       <p class="panel-subtitle">Respuestas recibidas de los publicadores</p>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <span id="reports-count" style="font-size:13px;color:var(--text-muted)"></span>
-        <button class="btn btn-ghost" onclick="loadReports()" style="padding:7px 14px;font-size:12px">↺ Actualizar</button>
-      </div>
+  <span id="reports-count" style="font-size:13px;color:var(--text-muted)"></span>
+
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost" onclick="toggleSort()" style="padding:7px 14px;font-size:12px">
+      ⇅ Ordenar
+    </button>
+
+    <button class="btn btn-ghost" onclick="downloadReportsExcel()" style="padding:7px 14px;font-size:12px">
+      ⬇ Excel
+    </button>
+
+    <button class="btn btn-ghost" onclick="loadReports()" style="padding:7px 14px;font-size:12px">
+      ↺ Actualizar
+    </button>
+  </div>
+</div>
       <div id="reports-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
         <div style="text-align:center;padding:60px;color:var(--text-muted)"><div class="spinner"></div></div>
       </div>
@@ -788,6 +801,11 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+let reportsSortDesc = true; // true = más nuevo primero
+let reportsCache = [];
+
+  
 // ════════════════════════════════════════
 // SUPABASE CONFIG
 // ════════════════════════════════════════
@@ -1114,6 +1132,79 @@ async function loadReports() {
   const territories = await terRes.json();
   const forms = await formRes.json();
 
+  async function loadReports() {
+  const res = await sb('territory_reports?select=*', { method:'GET' });
+  let reports = await res.json();
+
+  reportsCache = reports;
+  applySortAndRender();
+}
+
+  function toggleSort() {
+  reportsSortDesc = !reportsSortDesc;
+  applySortAndRender();
+}
+
+  function applySortAndRender() {
+  let reports = [...reportsCache];
+
+  reports.sort((a, b) => {
+    const da = new Date(a.created_at);
+    const db = new Date(b.created_at);
+    return reportsSortDesc ? db - da : da - db;
+  });
+
+  renderReports(reports); // usa tu render actual
+}
+
+  async function downloadReportsExcel() {
+  if (!reportsCache.length) {
+    toast('No hay reportes', 'error');
+    return;
+  }
+
+  let rows = reportsCache.map(r => {
+    const coverage = r.all_territory
+      ? 100
+      : Math.round((r.manzanas_done?.length || 0) / (r.total_manzanas || 1) * 100);
+
+    return {
+      Nombre: r.host_name || '–',
+      Fecha: formatDate(r.created_at),
+      Territorio: r.territory_num || '–',
+      Cobertura: coverage + '%'
+    };
+  });
+
+  // Convertir a CSV (Excel lo abre perfecto)
+  const header = Object.keys(rows[0]).join(',');
+  const csv = [
+    header,
+    ...rows.map(r => Object.values(r).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'reportes.csv';
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+  toast('Excel descargado');
+}
+
+function toggleSort() {
+  reportsSortDesc = !reportsSortDesc;
+
+  const btn = document.querySelector('[onclick="toggleSort()"]');
+  btn.textContent = reportsSortDesc ? '⬇ Más nuevos' : '⬆ Más antiguos';
+
+  applySortAndRender();
+}
+  
   const tMap = {};
   if (Array.isArray(territories)) territories.forEach(t => tMap[t.number] = t);
 
