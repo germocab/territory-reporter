@@ -446,15 +446,20 @@
   .theme-toggle-icon { font-size: 15px; }
 
   /* Mobile theme toggle (host screen) */
-  .host-theme-btn {
-    position: fixed; top: 16px; right: 16px; z-index: 100;
-    width: 38px; height: 38px; border-radius: 50%;
-    background: var(--surface); border: 1px solid var(--border);
+  /* Shared floating action button — back & theme toggle */
+  .host-fab {
+    position: fixed; top: 16px; z-index: 100;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--surface); border: 1.5px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 17px; transition: all 0.15s;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    cursor: pointer; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    color: var(--text);
   }
-  .host-theme-btn:hover { border-color: var(--gold); transform: scale(1.08); }
+  .host-fab:hover { border-color: var(--gold); transform: scale(1.07); box-shadow: 0 4px 20px rgba(0,0,0,0.22); }
+  .host-fab svg { stroke: var(--text); }
+  .host-theme-btn { right: 16px; }
+  .host-back-btn  { left: 16px; }
 </style>
 </head>
 <body>
@@ -652,8 +657,8 @@
 <div id="host-screen" class="hidden">
 
   <!-- Floating theme button -->
-  <button class="host-theme-btn" onclick="toggleTheme()" id="host-theme-btn" title="Cambiar tema">
-    <svg id="host-theme-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"></svg>
+  <button class="host-fab host-theme-btn" onclick="toggleTheme()" id="host-theme-btn" title="Cambiar tema">
+    <svg id="host-theme-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"></svg>
   </button>
 
   <!-- Step 0: Welcome + territory overview -->
@@ -673,22 +678,13 @@
   </div>
 
   <!-- Step 1: Select manzanas -->
-  <div id="host-step-1" class="host-select hidden" style="position:relative">
-    <!-- Floating back button top-left -->
-    <button onclick="hostStep(0)" style="
-      position:absolute;top:0;left:0;
-      width:40px;height:40px;border-radius:50%;border:1px solid var(--border);
-      background:var(--surface);cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      color:var(--text-muted);transition:all .15s;
-      box-shadow:0 2px 10px rgba(0,0,0,0.12);z-index:10;
-    "
-    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
-    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
+  <!-- Back button: fixed top-left, same level as theme toggle, only visible on step 1 -->
+  <button id="host-back-btn" class="host-fab host-back-btn hidden" onclick="hostStep(0)" title="Volver">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
 
-    <div class="host-select-header" style="padding-left:52px">
+  <div id="host-step-1" class="host-select hidden">
+    <div class="host-select-header" style="padding-top:8px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
         <div class="territory-num" id="host-sel-num">5</div>
         <h2 style="font-family:'DM Serif Display',serif;font-size:22px">Territorio <span id="host-sel-territory"></span></h2>
@@ -840,8 +836,8 @@ function toggleTheme() {
 const SUN_SVG = `<circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
 const MOON_SVG = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
 
-function makeThemeIcon(isDark, size=16) {
-  return `<svg width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${isDark ? SUN_SVG : MOON_SVG}</svg>`;
+function makeThemeIcon(isDark, size=16, strokeWidth=2) {
+  return `<svg width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">${isDark ? SUN_SVG : MOON_SVG}</svg>`;
 }
 
 function updateThemeButtons(mode) {
@@ -849,9 +845,9 @@ function updateThemeButtons(mode) {
   // Sidebar toggle
   const icon = document.getElementById('sidebar-theme-icon');
   const label = document.getElementById('sidebar-theme-label');
-  if (icon) icon.innerHTML = makeThemeIcon(isDark, 15);
+  if (icon) icon.innerHTML = makeThemeIcon(isDark, 15, 2);
   if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
-  // Host floating button
+  // Host floating button — heavier stroke, inherits --text color via CSS
   const hostIcon = document.getElementById('host-theme-icon');
   if (hostIcon) hostIcon.innerHTML = isDark ? SUN_SVG : MOON_SVG;
 }
@@ -1539,6 +1535,12 @@ function renderHostOverview() {
     return;
   }
 
+  // Single territory: skip overview, go straight to the map
+  if (nums.length === 1) {
+    startReporting(nums[0]);
+    return;
+  }
+
   allDoneEl.classList.add('hidden');
   sub.classList.remove('hidden');
   sub.textContent = pending.length === 1
@@ -1644,6 +1646,10 @@ function hostStep(step) {
   document.getElementById('host-step-0').classList.add('hidden');
   document.getElementById('host-step-1').classList.add('hidden');
   document.getElementById('host-step-2').classList.add('hidden');
+  // Back button only visible on step 1, and only if >1 territory
+  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
+  const backBtn = document.getElementById('host-back-btn');
+  if (backBtn) backBtn.classList.toggle('hidden', step !== 1 || nums.length <= 1);
 
   if (step === 0) {
     renderHostOverview();
