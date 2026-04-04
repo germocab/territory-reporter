@@ -570,12 +570,7 @@
       <!-- Inline create form (collapsible) -->
       <div id="create-form-inline" class="hidden" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:28px;animation:fadeUp .25s ease">
         <p style="font-size:15px;font-weight:600;margin-bottom:4px">Nuevo formulario</p>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Puedes asignar hasta 3 territorios por enlace</p>
-        <div id="migration-note" style="background:var(--gold-pale);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--gold);display:flex;align-items:flex-start;gap:8px">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>Para que los territorios con número repetido funcionen correctamente, ejecuta en Supabase SQL Editor: <code style="background:rgba(0,0,0,0.15);padding:1px 5px;border-radius:4px;font-family:monospace">ALTER TABLE territory_forms ADD COLUMN IF NOT EXISTS territory_ids jsonb; ALTER TABLE territory_reports ADD COLUMN IF NOT EXISTS territory_id text;</code></span>
-          <button onclick="document.getElementById('migration-note').remove()" style="background:none;border:none;color:var(--gold);cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;font-size:16px;line-height:1">×</button>
-        </div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Puedes asignar hasta 3 territorios por enlace</p>
         <div class="create-form-grid">
           <div class="form-group">
             <label>Publicador</label>
@@ -967,10 +962,6 @@ function showPanel(name) {
   document.querySelectorAll('.nav-item').forEach(n => {
     n.classList.toggle('active', n.dataset.panel === name);
   });
-  if (name === 'forms') { loadForms(); populateTerritorySelect(); }
-  if (name === 'territories') loadTerritories();
-  if (name === 'reports') loadReports();
-  if (name === 'dashboard') loadDashboard();
 }
 
 // ── DASHBOARD ──
@@ -1054,31 +1045,21 @@ async function loadForms() {
   const grid = document.getElementById('forms-grid');
   if (!forms.length) { grid.innerHTML = '<div class="empty-state"><h3>Sin formularios aún</h3><p>Crea el primero con "Nuevo formulario"</p></div>'; return; }
 
-  const [rRes, terRes] = await Promise.all([
-    sb('territory_reports?select=form_id,territory_num,territory_id', { method:'GET' }),
-    sb('territories?select=id,number,name&order=number.asc', { method:'GET' })
-  ]);
+  const rRes = await sb('territory_reports?select=form_id,territory_num', { method:'GET' });
   const reports = await rRes.json();
-  const terListRaw = await terRes.json();
-  const terList = Array.isArray(terListRaw) ? terListRaw : [];
 
-  // Build territory lookup by id and number
-  const terById = {}, terByNum = {};
-  terList.forEach(t => { terById[t.id] = t; terByNum[t.number] = t; });
-
-  // Map form_id → set of reported slot keys (territory_id or territory_num)
+  // Map form_id → set of reported territory_nums
   const reportedMap = {};
   reports.forEach(r => {
     if (!reportedMap[r.form_id]) reportedMap[r.form_id] = new Set();
-    reportedMap[r.form_id].add(r.territory_id || r.territory_num);
+    reportedMap[r.form_id].add(r.territory_num);
   });
 
   grid.innerHTML = forms.map(f => {
-    // Slot keys: ids if available, else nums
-    const slotKeys = f.territory_ids || f.territory_nums || (f.territory_num ? [f.territory_num] : []);
+    const nums = f.territory_nums || (f.territory_num ? [f.territory_num] : []);
     const reported = reportedMap[f.id] || new Set();
-    const allDone = slotKeys.length > 0 && slotKeys.every(k => reported.has(k));
-    const someReported = slotKeys.some(k => reported.has(k));
+    const allDone = nums.length > 0 && nums.every(n => reported.has(n));
+    const someReported = nums.some(n => reported.has(n));
     const statusBadge = allDone
       ? '<span class="badge badge-green">✓ Completado</span>'
       : someReported
@@ -1087,12 +1068,10 @@ async function loadForms() {
 
     const link = `${location.href.split('?')[0]}?token=${f.token}`;
 
-    // Territory badges — look up name by id or number
-    const tBadges = slotKeys.map(k => {
-      const done = reported.has(k);
-      const ter = terById[k] || terByNum[k];
-      const label = ter ? (ter.name ? `T${ter.number} – ${ter.name}` : `T${ter.number}`) : `T${k}`;
-      return `<span class="badge ${done ? 'badge-green' : 'badge-dim'}" style="font-size:12px">${label}${done ? ' ✓' : ''}</span>`;
+    // Territory badges row
+    const tBadges = nums.map(n => {
+      const done = reported.has(n);
+      return `<span class="badge ${done ? 'badge-green' : 'badge-dim'}" style="font-size:12px">T${n}${done ? ' ✓' : ''}</span>`;
     }).join('');
 
     return `
@@ -1136,7 +1115,7 @@ async function loadReports() {
   const forms = await formRes.json();
 
   const tMap = {};
-  if (Array.isArray(territories)) territories.forEach(t => { tMap[t.number] = t; tMap[t.id] = t; });
+  if (Array.isArray(territories)) territories.forEach(t => tMap[t.number] = t);
 
   // Group reports by form_id
   const formMap = {};
@@ -1172,7 +1151,7 @@ async function loadReports() {
 
     // Build side-by-side maps
     const mapsHtml = reps.map(r => {
-      const t = tMap[r.territory_id] || tMap[r.territory_num];
+      const t = tMap[r.territory_num];
       const coverage = r.all_territory ? 100 : Math.round((r.manzanas_done?.length||0)/(r.total_manzanas||1)*100);
       const doneManzanas = new Set((r.manzanas_done||[]).map(m => m.toLowerCase()));
       const svgHtml = t?.svg_data
@@ -1180,7 +1159,7 @@ async function loadReports() {
         : renderReportTiles(t?.manzanas||[], doneManzanas, r.all_territory);
       return `
       <div style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:13px;color:#0f0f0f">${(tMap[r.territory_id] || tMap[r.territory_num])?.number ?? r.territory_num}</div>
+        <div style="width:28px;height:28px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:13px;color:#0f0f0f">${r.territory_num}</div>
         <div style="width:100%;display:flex;align-items:center;justify-content:center;min-height:120px">${svgHtml}</div>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;font-weight:600;color:${coverage===100?'var(--green)':'var(--gold)'}">${coverage}%</span>
@@ -1298,7 +1277,7 @@ async function loadTerritories() {
       </div>` : '<div style="margin:14px 0 10px"></div>'}
 
       <div class="form-card-actions">
-        <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="openTerritoryModal('${t.id}')">
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="openTerritoryModal(${n})">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar
         </button>
@@ -1344,17 +1323,13 @@ async function openTerritoryModal(num) {
   document.getElementById('svg-drop').classList.remove('hidden');
 
   if (!isNew) {
-    // num is actually the territory id when editing
-    const res = await sb(`territories?id=eq.${num}&select=*`, { method:'GET' });
+    const res = await sb(`territories?number=eq.${num}&select=*`, { method:'GET' });
     const arr = await res.json();
     if (arr.length) {
       const t = arr[0];
-      currentTerritoryNum = t.number;
       currentTerritoryId = t.id;
       currentManzanas = t.manzanas || [];
       currentSvgData = t.svg_data || null;
-      document.getElementById('tm-modal-title').textContent = `Territorio ${t.number}`;
-      document.getElementById('tm-num-input').value = t.number;
       document.getElementById('tm-name').value = t.name || '';
       if (currentSvgData) showSvgPreview(currentSvgData);
     }
@@ -1433,7 +1408,6 @@ async function saveTerritory() {
     numInput.focus();
     return;
   }
-  // Duplicate numbers are allowed — different territories can share the same number
 
   const payload = { number: num, name, manzanas: currentManzanas, svg_data: currentSvgData };
 
@@ -1465,7 +1439,7 @@ async function deleteTerritory(id, num) {
 }
 // ── CREATE FORM ──
 async function populateTerritorySelect() {
-  const res = await sb(`territories?select=id,number,name&order=number.asc&_=${Date.now()}`, { method:'GET', headers: { 'Cache-Control': 'no-cache' } });
+  const res = await sb('territories?select=number,name&order=number.asc', { method:'GET' });
   let territories = await res.json();
   if (!Array.isArray(territories)) territories = [];
 
@@ -1475,9 +1449,8 @@ async function populateTerritorySelect() {
     const isRequired = slot === 1;
     sel.innerHTML = `<option value="">${isRequired ? 'Seleccionar territorio...' : 'Opcional'}</option>`;
     territories.forEach(t => {
-      const label = t.name ? `T${t.number} – ${t.name}` : `Territorio ${t.number}`;
-      // value = "id:number" so we can recover both
-      sel.innerHTML += `<option value="${t.id}:${t.number}">${label}</option>`;
+      const label = t.name ? `Territorio ${t.number} – ${t.name}` : `Territorio ${t.number}`;
+      sel.innerHTML += `<option value="${t.number}">${label}</option>`;
     });
   }
 }
@@ -1490,25 +1463,19 @@ async function createForm() {
   const t2 = document.getElementById('cf-territory-2').value;
   const t3 = document.getElementById('cf-territory-3').value;
 
-  // Parse "id:number" pairs from select values
-  const tPairs = [t1, t2, t3].filter(Boolean).map(v => {
-    const [id, num] = v.split(':');
-    return { id, number: Number(num) };
-  });
-  if (!host || !date || !tPairs.length) { toast('Completa los campos obligatorios y selecciona al menos un territorio', 'error'); return; }
+  const territories = [t1, t2, t3].filter(Boolean).map(Number);
+  if (!host || !date || !territories.length) { toast('Completa los campos obligatorios y selecciona al menos un territorio', 'error'); return; }
 
-  // Check for duplicates by id
-  const tIds = tPairs.map(p => p.id);
-  if (new Set(tIds).size !== tIds.length) { toast('No puedes asignar el mismo territorio dos veces', 'error'); return; }
+  // Check for duplicates
+  if (new Set(territories).size !== territories.length) { toast('No puedes asignar el mismo territorio dos veces', 'error'); return; }
 
   const btn = document.getElementById('btn-create-form');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> Generando...';
 
   const token = genToken();
-  const tNums = tPairs.map(p => p.number);
-  // territory_ids = array of UUIDs (new); territory_nums = array of numbers (compat); territory_num = first number (legacy)
-  const payload = { host_name: host, territory_num: tNums[0], territory_nums: tNums, territory_ids: tIds, assignment_date: date, notes: notes || null, token };
+  // territory_num (singular) kept for backward compat; territory_nums is the new array
+  const payload = { host_name: host, territory_num: territories[0], territory_nums: territories, assignment_date: date, notes: notes || null, token };
 
   try {
     const res = await sb('territory_forms', { method:'POST', body: JSON.stringify(payload), prefer: 'return=representation' });
@@ -1580,31 +1547,19 @@ async function initHostScreen(token) {
   }
   hostFormData = forms[0];
 
-  // Support territory_ids (new, by UUID), territory_nums (by number), territory_num (legacy)
-  const ids = hostFormData.territory_ids || [];
+  // Support both old (territory_num) and new (territory_nums) schema
   const nums = hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
 
   // Load already-submitted reports for this form
-  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=territory_num,territory_id`, { method:'GET' });
+  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=territory_num`, { method:'GET' });
   const existing = await rRes.json();
-  // hostReportedNums tracks the "slot key" — id if available, else number
-  hostReportedNums = new Set(existing.map(r => r.territory_id || r.territory_num));
+  hostReportedNums = new Set(existing.map(r => r.territory_num));
 
-  // Load territory configs — by id if we have them, else by number
-  if (ids.length) {
-    const tRes = await sb(`territories?id=in.(${ids.join(',')})&select=*`, { method:'GET' });
-    const tArr = await tRes.json();
-    // key by id so slots are unambiguous even when numbers repeat
-    tArr.forEach(t => hostTerritoriesData[t.id] = t);
-    // also expose by number for legacy paths, last-write-wins (acceptable)
-    tArr.forEach(t => { if (!hostTerritoriesData[t.number]) hostTerritoriesData[t.number] = t; });
-    // rewrite hostFormData.territory_nums to use ids as slot keys for the host flow
-    hostFormData._slotKeys = ids;
-  } else if (nums.length) {
+  // Load territory configs for all assigned nums
+  if (nums.length) {
     const tRes = await sb(`territories?number=in.(${nums.join(',')})&select=*`, { method:'GET' });
     const tArr = await tRes.json();
     tArr.forEach(t => hostTerritoriesData[t.number] = t);
-    hostFormData._slotKeys = nums;
   }
 
   document.getElementById('host-name-display').textContent = hostFormData.host_name;
@@ -1613,7 +1568,7 @@ async function initHostScreen(token) {
 }
 
 function renderHostOverview() {
-  const nums = hostFormData._slotKeys || hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
+  const nums = hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
   const pending = nums.filter(n => !hostReportedNums.has(n));
   const allDone = pending.length === 0;
 
@@ -1640,22 +1595,19 @@ function renderHostOverview() {
     // Hide the default h1 heading so we can render the full splash inside cardsEl
     const defaultHeading = document.querySelector('.host-welcome-name');
     if (defaultHeading) defaultHeading.classList.add('hidden');
-    const tSingle = hostTerritoriesData[n] || {};
-    const dispNumSingle = tSingle.number ?? n;
-    const dispNameSingle = tSingle.name || `Territorio ${dispNumSingle}`;
     cardsEl.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;width:100%">
         <div style="width:100px;height:100px;background:var(--gold);border-radius:28px;
           display:flex;align-items:center;justify-content:center;
           font-family:'DM Serif Display',serif;font-size:48px;color:#0f0f0f;
-          margin-bottom:32px;box-shadow:0 20px 60px rgba(232,184,75,0.3);">${dispNumSingle}</div>
+          margin-bottom:32px;box-shadow:0 20px 60px rgba(232,184,75,0.3);">${n}</div>
         <h1 style="font-family:'DM Serif Display',serif;font-size:32px;margin-bottom:8px">
           ¡Hola, <span style="color:var(--gold);font-style:italic">${hostFormData.host_name}</span>!
         </h1>
         <p style="color:var(--text-muted);font-size:15px;margin-bottom:36px;line-height:1.5">
           Envía tu informe del territorio<br>de hoy.
         </p>
-        <button class="btn btn-gold" onclick="startReporting('${n}')"
+        <button class="btn btn-gold" onclick="startReporting(${n})"
           style="padding:15px 40px;font-size:15px">
           Comenzar
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -1677,12 +1629,10 @@ function renderHostOverview() {
   cardsEl.innerHTML = nums.map(n => {
     const done = hostReportedNums.has(n);
     const t = hostTerritoriesData[n];
-    const dispNum = t?.number ?? n;
-    const dispName = t?.name || `Territorio ${dispNum}`;
     const svgHtml = t?.svg_data ? buildPreviewSvg(t.svg_data, t.manzanas || [], new Set(), false, true) : '';
 
     return `
-    <div onclick="${done ? '' : `startReporting('${n}')`}"
+    <div onclick="${done ? '' : `startReporting(${n})`}"
       style="
         background:var(--surface);border:1px solid ${done ? 'var(--green)' : 'var(--border)'};
         border-radius:var(--radius);overflow:hidden;
@@ -1694,8 +1644,8 @@ function renderHostOverview() {
       <!-- Card header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:34px;height:34px;background:${done ? 'var(--green)' : 'var(--gold)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#0f0f0f;flex-shrink:0">${dispNum}</div>
-          <span style="font-weight:600;font-size:15px">${dispName}</span>
+          <div style="width:34px;height:34px;background:${done ? 'var(--green)' : 'var(--gold)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:16px;color:#0f0f0f;flex-shrink:0">${n}</div>
+          <span style="font-weight:600;font-size:15px">Territorio ${n}</span>
         </div>
         ${done
           ? '<span class="badge badge-green" style="font-size:11px">✓ Enviado</span>'
@@ -1787,7 +1737,7 @@ function extractTerritoryColor(t) {
 }
 
 function applyTerritoryColor(num) {
-  const t = hostTerritoriesData[num];  // num is slotKey (id or number)
+  const t = hostTerritoriesData[num];
   const color = extractTerritoryColor(t);
 
   // Apply to Continue button (step 1)
@@ -1804,10 +1754,10 @@ function startReporting(num) {
   selectedManzanas = [];
   allSelected = false;
 
-  const nums = hostFormData?._slotKeys || hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
-  const t = hostTerritoriesData[num] || { manzanas: [], svg_data: null };
+  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
+  const t = hostTerritoriesData[num] || { number: num, manzanas: [], svg_data: null };
 
-  document.getElementById('host-sel-territory').textContent = t?.number ?? num;
+  document.getElementById('host-sel-territory').textContent = num;
 
   document.getElementById('host-step-0').classList.add('hidden');
   document.getElementById('host-step-1').classList.remove('hidden');
@@ -1828,7 +1778,7 @@ function hostStep(step) {
   document.getElementById('host-step-1').classList.add('hidden');
   document.getElementById('host-step-2').classList.add('hidden');
   // Back button visible on steps 1 & 2 only for multi-territory links
-  const nums = hostFormData?._slotKeys || hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
+  const nums = hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
   const backBtn = document.getElementById('host-back-btn');
   const isMulti = nums.length > 1;
   if (backBtn) backBtn.classList.toggle('hidden', !isMulti || step === 0);
@@ -1983,12 +1933,10 @@ function renderConfirmStep() {
   const t = hostTerritoriesData[hostCurrentTerritory] || {};
   const manzanas = t.manzanas || [];
   const isAll = allSelected || selectedManzanas.length === manzanas.length;
-  const displayNum = t.number ?? hostCurrentTerritory;
-  const displayName = t.name || `Territorio ${displayNum}`;
 
   document.getElementById('confirm-title').textContent = isAll
-    ? `${displayName} completado`
-    : `${displayName} – ${selectedManzanas.join(', ')}`;
+    ? `Territorio ${hostCurrentTerritory} completado`
+    : `Territorio ${hostCurrentTerritory} – ${selectedManzanas.join(', ')}`;
   document.getElementById('confirm-subtitle').textContent = '¿Quieres enviar tu reporte?';
   document.getElementById('confirm-manzanas-list').innerHTML = isAll
     ? '<span class="badge badge-green" style="padding:6px 16px;font-size:13px">Territorio completo ✓</span>'
@@ -2004,12 +1952,10 @@ async function submitReport() {
   const manzanas = t.manzanas || [];
   const isAll = allSelected || selectedManzanas.length === manzanas.length;
 
-  const isUuid = typeof hostCurrentTerritory === 'string' && hostCurrentTerritory.includes('-');
   const payload = {
     form_id: hostFormData.id,
     host_name: hostFormData.host_name,
-    territory_num: t.number ?? (isUuid ? null : hostCurrentTerritory),
-    territory_id: isUuid ? hostCurrentTerritory : (t.id || null),
+    territory_num: hostCurrentTerritory,
     manzanas_done: isAll ? manzanas : selectedManzanas,
     all_territory: isAll,
     total_manzanas: manzanas.length
