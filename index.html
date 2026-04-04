@@ -1913,7 +1913,9 @@ async function submitReport() {
   const res = await sb('territory_reports', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
   if (res.ok) {
     hostReportedNums.add(hostCurrentTerritory);
-    // Back to overview — which will show remaining or all-done
+    // Reset submit button so it's clean for the next territory
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar';
     renderHostOverview();
   } else {
     toast('Error al enviar. Intenta de nuevo.', 'error');
