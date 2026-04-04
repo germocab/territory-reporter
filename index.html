@@ -1535,11 +1535,38 @@ function renderHostOverview() {
     return;
   }
 
-  // Single territory: skip overview, go straight to the map
+  // Single territory: show welcome splash with "Comenzar" button
   if (nums.length === 1) {
-    startReporting(nums[0]);
+    const n = nums[0];
+    allDoneEl.classList.add('hidden');
+    sub.classList.add('hidden');
+    // Hide the default h1 heading so we can render the full splash inside cardsEl
+    const defaultHeading = document.querySelector('.host-welcome-name');
+    if (defaultHeading) defaultHeading.classList.add('hidden');
+    cardsEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;width:100%">
+        <div style="width:100px;height:100px;background:var(--gold);border-radius:28px;
+          display:flex;align-items:center;justify-content:center;
+          font-family:'DM Serif Display',serif;font-size:48px;color:#0f0f0f;
+          margin-bottom:32px;box-shadow:0 20px 60px rgba(232,184,75,0.3);">${n}</div>
+        <h1 style="font-family:'DM Serif Display',serif;font-size:32px;margin-bottom:8px">
+          ¡Hola, <span style="color:var(--gold);font-style:italic">${hostFormData.host_name}</span>!
+        </h1>
+        <p style="color:var(--text-muted);font-size:15px;margin-bottom:36px;line-height:1.5">
+          Envía tu informe del territorio<br>de hoy.
+        </p>
+        <button class="btn btn-gold" onclick="startReporting(${n})"
+          style="padding:15px 40px;font-size:15px">
+          Comenzar
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>`;
     return;
   }
+
+  // Multi-territory: restore the default heading if it was hidden
+  const defaultHeading = document.querySelector('.host-welcome-name');
+  if (defaultHeading) defaultHeading.classList.remove('hidden');
 
   allDoneEl.classList.add('hidden');
   sub.classList.remove('hidden');
