@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Territorios</title>
+<title>Territorios 2.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -1633,7 +1633,7 @@ async function deleteTerritory(id, num) {
 }
 // ── CREATE FORM ──
 async function populateTerritorySelect() {
-  const res = await sb(`territories?select=id,number,name&order=number.asc&_=${Date.now()}`, { method:'GET', headers: { 'Cache-Control': 'no-cache' } });
+  const res = await sb(`territories?select=id,number,name&order=number.asc`, { method:'GET', headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } });
   let territories = await res.json();
   if (!Array.isArray(territories)) territories = [];
 
