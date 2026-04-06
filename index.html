@@ -1102,7 +1102,7 @@ async function loadForms() {
     const statusBadge = allDone
       ? '<span class="badge badge-green">✓ Completado</span>'
       : someReported
-        ? '<span class="badge badge-gold">En progreso</span>'
+        ? '<span class="badge badge-gold">En curso</span>'
         : '<span class="badge badge-dim">Pendiente</span>';
 
     const link = `${location.href.split('?')[0]}?token=${f.token}`;
@@ -1254,27 +1254,117 @@ async function loadReports() {
     return `${day.charAt(0).toUpperCase() + day.slice(1)}, ${d} de ${MONTHS_ES[m-1]} ${y}`;
   }
 
-  container.innerHTML = sortedDates.map(dateKey => {
-    const groups = byDate[dateKey].sort((a, b) => {
-      const nameA = (formMap[a[0]]?.host_name || '').toLowerCase();
-      const nameB = (formMap[b[0]]?.host_name || '').toLowerCase();
-      return nameA.localeCompare(nameB);
+  // ── Group dates into ISO weeks (Mon–Sun) ──
+  function getISOWeekKey(dateStr) {
+    if (!dateStr || dateStr === 'Sin fecha') return 'sin-fecha';
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    // Get Monday of that week
+    const day = date.getDay(); // 0=Sun
+    const diffToMon = (day === 0 ? -6 : 1 - day);
+    const mon = new Date(date); mon.setDate(date.getDate() + diffToMon);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatWeekRange(monDateStr) {
+    if (monDateStr === 'sin-fecha') return 'Sin fecha';
+    const [y, m, d] = monDateStr.split('-').map(Number);
+    const mon = new Date(y, m - 1, d);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const fmt = (dt) => `${dt.getDate()} ${MONTHS_ES[dt.getMonth()]}`;
+    return `Semana del ${fmt(mon)} al ${fmt(sun)} ${sun.getFullYear()}`;
+  }
+
+  // Build week → dates map, sorted
+  const byWeek = {};
+  sortedDates.forEach(dateKey => {
+    const wk = getISOWeekKey(dateKey);
+    if (!byWeek[wk]) byWeek[wk] = [];
+    byWeek[wk].push(dateKey);
+  });
+  const sortedWeeks = Object.keys(byWeek).sort((a, b) => {
+    if (a === 'sin-fecha') return 1;
+    if (b === 'sin-fecha') return -1;
+    return b.localeCompare(a);
+  });
+
+  // Unique ID counter for collapsible sections
+  let colId = 0;
+
+  container.innerHTML = sortedWeeks.map(weekKey => {
+    const datesInWeek = byWeek[weekKey].sort((a, b) => {
+      if (a === 'Sin fecha') return 1;
+      if (b === 'Sin fecha') return -1;
+      return b.localeCompare(a); // newest day first within week
     });
 
-    const cardsHtml = groups.map(([formId, reps]) => buildReportCard(formId, reps)).join('');
+    const totalReportsInWeek = datesInWeek.reduce((sum, dk) => sum + byDate[dk].length, 0);
+
+    const daysHtml = datesInWeek.map(dateKey => {
+      const groups = byDate[dateKey].sort((a, b) => {
+        const nameA = (formMap[a[0]]?.host_name || '').toLowerCase();
+        const nameB = (formMap[b[0]]?.host_name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
+      const cardsHtml = groups.map(([formId, reps]) => buildReportCard(formId, reps)).join('');
+
+      // Saturday (day 6) starts collapsed, all others expanded
+      const [dy, dm, dd] = dateKey !== 'Sin fecha' ? dateKey.split('-').map(Number) : [0,0,0];
+      const dayOfWeek = dateKey !== 'Sin fecha' ? new Date(dy, dm-1, dd).getDay() : -1;
+      const isSaturday = dayOfWeek === 6;
+      const sectionId = `day-section-${colId++}`;
+      const startOpen = !isSaturday;
+
+      return `
+      <div style="margin-bottom:20px">
+        <div onclick="toggleDaySection('${sectionId}')"
+          style="display:flex;align-items:center;gap:10px;margin-bottom:${startOpen ? '12px' : '0'};cursor:pointer;user-select:none"
+          id="${sectionId}-header">
+          <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--text)">${formatAssignmentDate(dateKey)}</div>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-size:11px;color:var(--text-muted)">${groups.length} reporte${groups.length!==1?'s':''}</span>
+          ${isSaturday ? '<span class="badge badge-gold" style="font-size:10px">Sábado</span>' : ''}
+          <svg id="${sectionId}-chevron" width="14" height="14" fill="none" stroke="var(--text-muted)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+            style="transition:transform .2s;transform:rotate(${startOpen ? '0' : '-90'}deg)">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div id="${sectionId}" style="display:${startOpen ? 'grid' : 'none'};grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;overflow:hidden">
+          ${cardsHtml}
+        </div>
+      </div>`;
+    }).join('');
 
     return `
-    <div style="margin-bottom:32px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div style="font-family:'DM Serif Display',serif;font-size:18px;font-weight:600">${formatAssignmentDate(dateKey)}</div>
-        <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:12px;color:var(--text-muted)">${groups.length} reporte${groups.length!==1?'s':''}</span>
+    <div style="margin-bottom:36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'DM Serif Display',serif;font-size:17px">${formatWeekRange(weekKey)}</div>
+        <span style="font-size:12px;color:var(--text-muted)">${totalReportsInWeek} reporte${totalReportsInWeek!==1?'s':''}</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
-        ${cardsHtml}
+      <div style="padding:20px 20px 4px">
+        ${daysHtml}
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleDaySection(id) {
+  const section = document.getElementById(id);
+  const chevron = document.getElementById(id + '-chevron');
+  const header = document.getElementById(id + '-header');
+  const isOpen = section.style.display !== 'none';
+  if (isOpen) {
+    section.style.display = 'none';
+    chevron.style.transform = 'rotate(-90deg)';
+    header.style.marginBottom = '0';
+  } else {
+    section.style.display = 'grid';
+    chevron.style.transform = 'rotate(0deg)';
+    header.style.marginBottom = '12px';
+  }
 }
 
 
