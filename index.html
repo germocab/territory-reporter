@@ -1102,7 +1102,7 @@ async function loadForms() {
     const statusBadge = allDone
       ? '<span class="badge badge-green">✓ Completado</span>'
       : someReported
-        ? '<span class="badge badge-gold">Curso</span>'
+        ? '<span class="badge badge-gold">En curso</span>'
         : '<span class="badge badge-dim">Pendiente</span>';
 
     const link = `${location.href.split('?')[0]}?token=${f.token}`;
@@ -2208,18 +2208,42 @@ async function submitReport() {
   const isNone = noneSelected;
 
   const isUuid = typeof hostCurrentTerritory === 'string' && hostCurrentTerritory.includes('-');
+
+  // Core payload — only columns guaranteed to exist in territory_reports
   const payload = {
     form_id: hostFormData.id,
     host_name: hostFormData.host_name,
-    territory_num: t.number ?? (isUuid ? null : hostCurrentTerritory),
-    territory_id: isUuid ? hostCurrentTerritory : (t.id || null),
+    territory_num: t.number ?? (isUuid ? null : Number(hostCurrentTerritory) || null),
     manzanas_done: isAll ? manzanas : (isNone ? [] : selectedManzanas),
     all_territory: isAll,
-    not_covered: isNone,
     total_manzanas: manzanas.length
   };
 
-  const res = await sb('territory_reports', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
+  // Add extended columns only if migration has been run (detected by presence of territory_ids in form)
+  if (hostFormData.territory_ids !== undefined) {
+    payload.territory_id = isUuid ? hostCurrentTerritory : (t.id || null);
+  }
+  if (isNone) {
+    // Try to add not_covered — will fail gracefully if column doesn't exist
+    payload.not_covered = true;
+  }
+
+  // First attempt
+  let res = await sb('territory_reports', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
+
+  // If failed and we added optional columns, retry without them
+  if (!res.ok && (payload.territory_id !== undefined || payload.not_covered !== undefined)) {
+    const fallback = {
+      form_id: payload.form_id,
+      host_name: payload.host_name,
+      territory_num: payload.territory_num,
+      manzanas_done: payload.manzanas_done,
+      all_territory: payload.all_territory,
+      total_manzanas: payload.total_manzanas
+    };
+    res = await sb('territory_reports', { method:'POST', body: JSON.stringify(fallback), prefer:'return=minimal' });
+  }
+
   if (res.ok) {
     hostReportedNums.add(hostCurrentTerritory);
     // Reset submit button so it's clean for the next territory
