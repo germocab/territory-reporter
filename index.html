@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Territorios 2.5</title>
+<title>Reportes de Territorio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -473,7 +473,7 @@
 <div id="login-screen" class="hidden">
   <div class="login-card">
     <div class="login-logo">T</div>
-    <h1>Territorios</h1>
+    <h1>Reportes de Territorio en Fleming</h1>
     <p>Panel de administración</p>
     <div class="form-group">
       <label>Contraseña</label>
@@ -701,7 +701,11 @@
         <svg width="32" height="32" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <h2 style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px">¡Todo enviado!</h2>
-      <p style="color:var(--text-muted);font-size:14px">Todos los territorios han sido reportados.</p>
+      <p style="color:var(--text-muted);font-size:14px;margin-bottom:28px">Todos los territorios han sido reportados. Si quieres reportar uno nuevo, haz click abajo</p>
+      <button class="btn btn-gold" onclick="hostStep(3)" style="padding:13px 28px;font-size:14px">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Nuevo reporte
+      </button>
     </div>
   </div>
 
@@ -757,6 +761,17 @@
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
       Enviar
     </button>
+  </div>
+
+  <!-- Step 3: Bonus territory picker -->
+  <div id="host-step-3" class="host-select hidden">
+    <div class="host-select-header" style="padding-top:8px">
+      <h2 style="font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:4px">¿Cuál territorio hiciste?</h2>
+      <p style="color:var(--text-muted);font-size:13px">Selecciona el territorio adicional</p>
+    </div>
+    <div id="host-bonus-list" style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1;padding-bottom:8px">
+      <div style="text-align:center;padding:40px"><div class="spinner"></div></div>
+    </div>
   </div>
 
 </div>
@@ -1102,7 +1117,7 @@ async function loadForms() {
     const statusBadge = allDone
       ? '<span class="badge badge-green">✓ Completado</span>'
       : someReported
-        ? '<span class="badge badge-gold">En curso</span>'
+        ? '<span class="badge badge-gold">En progreso</span>'
         : '<span class="badge badge-dim">Pendiente</span>';
 
     const link = `${location.href.split('?')[0]}?token=${f.token}`;
@@ -1791,7 +1806,7 @@ function renderHostOverview() {
   const allDoneEl = document.getElementById('host-all-done');
 
   // Show all steps hidden, step-0 visible
-  [1,2].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
+  [1,2,3].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
   document.getElementById('host-step-0').classList.remove('hidden');
 
   if (allDone) {
@@ -1995,14 +2010,23 @@ function startReporting(num) {
 }
 
 function hostStep(step) {
-  document.getElementById('host-step-0').classList.add('hidden');
-  document.getElementById('host-step-1').classList.add('hidden');
-  document.getElementById('host-step-2').classList.add('hidden');
-  // Back button visible on steps 1 & 2 only for multi-territory links
+  [0,1,2,3].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
+
+  // Back button: visible on steps 1 & 2 for multi-territory, and on step 3 always (goes to all-done)
   const nums = hostFormData?._slotKeys || hostFormData?.territory_nums || (hostFormData?.territory_num ? [hostFormData.territory_num] : []);
   const backBtn = document.getElementById('host-back-btn');
   const isMulti = nums.length > 1;
-  if (backBtn) backBtn.classList.toggle('hidden', !isMulti || step === 0);
+  if (backBtn) {
+    if (step === 3) {
+      backBtn.classList.remove('hidden');
+      backBtn.onclick = () => hostStep(0);
+    } else if ((step === 1 || step === 2) && isMulti) {
+      backBtn.classList.remove('hidden');
+      backBtn.onclick = step === 1 ? () => hostStep(0) : () => hostStep(1);
+    } else {
+      backBtn.classList.add('hidden');
+    }
+  }
 
   if (step === 0) {
     renderHostOverview();
@@ -2013,7 +2037,111 @@ function hostStep(step) {
     document.getElementById('host-step-2').classList.remove('hidden');
     applyTerritoryColor(hostCurrentTerritory);
     renderConfirmStep();
+  } else if (step === 3) {
+    document.getElementById('host-step-3').classList.remove('hidden');
+    loadBonusTerritoryList();
   }
+}
+
+async function loadBonusTerritoryList() {
+  const listEl = document.getElementById('host-bonus-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:40px"><div class="spinner"></div></div>';
+
+  const res = await sb('territories?select=*&order=number.asc', { method:'GET' });
+  let all = await res.json();
+  if (!Array.isArray(all)) all = [];
+
+  // Exclude already-reported territories this session
+  const available = all.filter(t => !hostReportedNums.has(t.id) && !hostReportedNums.has(t.number));
+
+  if (!available.length) {
+    listEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px">
+      Ya reportaste todos los territorios disponibles. ¡Increíble!
+    </div>`;
+    return;
+  }
+
+  listEl.innerHTML = available.map(t => {
+    const color = extractTerritoryColor(t);
+    const mcount = t.manzanas?.length || 0;
+
+    // Small SVG preview if available
+    let svgThumb = '';
+    if (t.svg_data) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+        const svg = doc.querySelector('svg');
+        if (svg) {
+          svg.removeAttribute('width'); svg.removeAttribute('height');
+          svg.style.width = '56px'; svg.style.height = '56px';
+          svg.style.pointerEvents = 'none'; svg.style.flexShrink = '0';
+          svg.querySelectorAll('path,polygon').forEach(el => el.removeAttribute('fill-opacity'));
+          svgThumb = new XMLSerializer().serializeToString(svg);
+        }
+      } catch(e) {}
+    }
+
+    return `
+    <div onclick="startBonusReporting('${t.id}', ${t.number})"
+      style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);
+        border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .12s;
+        -webkit-tap-highlight-color:transparent"
+      onmouseover="this.style.borderColor='${color}';this.style.transform='translateY(-1px)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.transform='translateY(0)'">
+      <div style="width:44px;height:44px;background:${color};border-radius:12px;display:flex;align-items:center;
+        justify-content:center;font-family:'DM Serif Display',serif;font-size:20px;color:#0f0f0f;flex-shrink:0">
+        ${t.number}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:14px;margin-bottom:2px">${t.name || `Territorio ${t.number}`}</div>
+        <div style="font-size:12px;color:var(--text-muted)">${mcount ? `${mcount} manzana${mcount!==1?'s':''}` : 'Sin manzanas'}</div>
+      </div>
+      ${svgThumb ? `<div style="opacity:0.7;flex-shrink:0">${svgThumb}</div>` : ''}
+      <svg width="14" height="14" fill="none" stroke="var(--text-dim)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0">
+        <polyline points="9 18 15 12 9 6"/>
+      </svg>
+    </div>`;
+  }).join('');
+}
+
+function startBonusReporting(id, num) {
+  // Register this territory in hostTerritoriesData if not already there
+  // It will be populated when renderTerritoryMap calls it — but we need to fetch it first
+  const existing = hostTerritoriesData[id] || hostTerritoriesData[num];
+  if (existing) {
+    _doStartBonus(existing);
+  } else {
+    sb(`territories?id=eq.${id}&select=*`, { method:'GET' })
+      .then(r => r.json())
+      .then(arr => {
+        if (arr.length) { hostTerritoriesData[arr[0].id] = arr[0]; hostTerritoriesData[arr[0].number] = arr[0]; }
+        _doStartBonus(arr[0] || { id, number: num, manzanas: [], svg_data: null });
+      });
+  }
+}
+
+function _doStartBonus(t) {
+  const slotKey = t.id || t.number;
+  hostCurrentTerritory = slotKey;
+  selectedManzanas = [];
+  allSelected = false;
+  noneSelected = false;
+
+  document.getElementById('host-sel-territory').textContent = t.number;
+  document.getElementById('all-toggle').classList.remove('on');
+  document.getElementById('none-toggle').classList.remove('on');
+
+  [0,2,3].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
+  document.getElementById('host-step-1').classList.remove('hidden');
+
+  // Back button goes back to territory picker
+  const backBtn = document.getElementById('host-back-btn');
+  if (backBtn) { backBtn.classList.remove('hidden'); backBtn.onclick = () => hostStep(3); }
+
+  applyTerritoryColor(slotKey);
+  renderTerritoryMap(t);
+  updateContinueBtn();
 }
 
 function renderTerritoryMap(t) {
