@@ -1059,7 +1059,7 @@
 
       <!-- Quick actions -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px">
-        <button class="btn btn-gold" onclick="showPanel('forms');setTimeout(()=>openFormTypeModal(),100)">
+        <button class="btn btn-gold" onclick="showPanel('forms');setTimeout(()=>toggleCreateForm(),100)">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Crear formulario
         </button>
@@ -1122,7 +1122,7 @@
           <p class="panel-title" style="margin-bottom:4px">Formularios</p>
           <p class="panel-subtitle" style="margin-bottom:0">Formularios enviados a publicadores</p>
         </div>
-        <button class="btn btn-gold" onclick="openFormTypeModal()" id="btn-toggle-create">
+        <button class="btn btn-gold" onclick="toggleCreateForm()" id="btn-toggle-create">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Nuevo formulario
         </button>
@@ -1130,9 +1130,8 @@
 
       <!-- Inline create form (collapsible) -->
       <div id="create-form-inline" class="hidden" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:28px;animation:fadeUp .25s ease">
-        <p id="cf-title" style="font-size:15px;font-weight:600;margin-bottom:4px">Nuevo formulario</p>
-        <p id="cf-subtitle" style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Puedes asignar hasta 3 territorios por enlace</p>
-        <div id="unique-mode-hint" class="hidden" style="background:var(--gold-pale);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--gold);line-height:1.5">Este enlace quedará fijo para este publicador. La próxima vez solo tendrás que asignarle territorios nuevos, sin generar otro enlace.</div>
+        <p style="font-size:15px;font-weight:600;margin-bottom:4px">Nuevo formulario</p>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Puedes asignar hasta 3 territorios por enlace</p>
         <div id="migration-note" style="background:var(--gold-pale);border:1px solid var(--gold-dim);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--gold);display:flex;align-items:flex-start;gap:8px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <button onclick="document.getElementById('migration-note').remove()" style="background:none;border:none;color:var(--gold);cursor:pointer;padding:0;margin-left:auto;flex-shrink:0;font-size:16px;line-height:1">×</button>
@@ -1141,7 +1140,7 @@
           <div class="form-group full-width">
             <label>Publicador</label>
             <div style="display:flex;gap:8px;align-items:center">
-              <select id="cf-host" style="flex:1" onchange="onHostSelectChange()">
+              <select id="cf-host" style="flex:1">
                 <option value="">Seleccionar publicador...</option>
               </select>
               <button class="btn btn-ghost" onclick="openAddBrotherModal()" type="button" style="padding:9px 14px;font-size:12px;white-space:nowrap;flex-shrink:0">
@@ -1176,7 +1175,7 @@
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <button class="btn btn-gold" onclick="createForm()" id="btn-create-form">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            <span id="btn-create-form-label">Generar enlace</span>
+            Generar enlace
           </button>
           <button class="btn btn-ghost" onclick="toggleCreateForm()">Cancelar</button>
         </div>
@@ -1501,32 +1500,6 @@
 <!-- ════════════════════════════════════════
      NUEVO HERMANO MODAL
 ════════════════════════════════════════ -->
-<div id="form-type-modal" class="modal-overlay hidden">
-  <div class="modal" style="max-width:420px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h2 style="font-size:18px">Nuevo formulario</h2>
-      <button onclick="closeModal('form-type-modal')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1;padding:0">×</button>
-    </div>
-    <p style="color:var(--text-muted);font-size:13px;margin-bottom:18px">Elige el tipo de enlace que quieres generar</p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button type="button" onclick="chooseFormType('unique')" style="text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;color:var(--text)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <svg width="15" height="15" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <strong style="font-size:14px">Link único</strong>
-        </div>
-        <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.4">Un enlace fijo por publicador. Luego solo le asignas territorios nuevos, sin enviarle otro enlace.</p>
-      </button>
-      <button type="button" onclick="chooseFormType('single_use')" style="text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;color:var(--text)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <svg width="15" height="15" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          <strong style="font-size:14px">Link de un uso</strong>
-        </div>
-        <p style="font-size:12px;color:var(--text-muted);margin:0;line-height:1.4">El funcionamiento de siempre: genera un enlace nuevo para esta asignación de territorios.</p>
-      </button>
-    </div>
-  </div>
-</div>
-
 <div id="add-brother-modal" class="modal-overlay hidden">
   <div class="modal" style="max-width:360px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -2408,17 +2381,14 @@ function drawChart(id, type, labels, data, label, color, horizontal=false) {
 }
 
 // ── FORMS ──
-let formsCache = []; // cached forms, used to look up an existing Link Único by host name
-
 async function loadForms() {
   const res = await sb(congFilter('territory_forms?select=*&order=created_at.desc'), { method:'GET' });
   const forms = await res.json();
-  formsCache = Array.isArray(forms) ? forms : [];
   const grid = document.getElementById('forms-grid');
   if (!forms.length) { grid.innerHTML = '<div class="empty-state"><h3>Sin formularios aún</h3><p>Crea el primero con "Nuevo formulario"</p></div>'; return; }
 
   const [rRes, terRes] = await Promise.all([
-    sb(congFilter('territory_reports?select=form_id,territory_num,territory_id,created_at'), { method:'GET' }),
+    sb(congFilter('territory_reports?select=form_id,territory_num,territory_id'), { method:'GET' }),
     sb(congFilter('territories?select=id,number,name&order=number.asc'), { method:'GET' })
   ]);
   const reports = await rRes.json();
@@ -2429,28 +2399,25 @@ async function loadForms() {
   const terById = {}, terByNum = {};
   terList.forEach(t => { terById[t.id] = t; terByNum[t.number] = t; });
 
+  // Map form_id → set of reported slot keys (territory_id or territory_num)
+  const reportedMap = {};
+  reports.forEach(r => {
+    if (!reportedMap[r.form_id]) reportedMap[r.form_id] = new Set();
+    reportedMap[r.form_id].add(r.territory_id || r.territory_num);
+  });
+
   grid.innerHTML = forms.map(f => {
     // Slot keys: ids if available, else nums
     const slotKeys = f.territory_ids || f.territory_nums || (f.territory_num ? [f.territory_num] : []);
-    // For a Link Único, a report only counts toward the *current* assignment (cycle_started_at)
-    // so re-assigning the same host doesn't instantly show old reports as "already done".
-    const cycleStart = f.cycle_started_at ? new Date(f.cycle_started_at).getTime() : 0;
-    const reported = new Set(
-      reports
-        .filter(r => r.form_id === f.id && (!cycleStart || !r.created_at || new Date(r.created_at).getTime() >= cycleStart))
-        .map(r => r.territory_id || r.territory_num)
-    );
+    const reported = reportedMap[f.id] || new Set();
     const allDone = slotKeys.length > 0 && slotKeys.every(k => reported.has(k));
     const someReported = slotKeys.some(k => reported.has(k));
-    const statusBadge = slotKeys.length === 0
-      ? '<span class="badge badge-dim">Sin territorios</span>'
-      : allDone
-        ? '<span class="badge badge-green">✓ Completado</span>'
-        : someReported
-          ? '<span class="badge badge-gold">En progreso</span>'
-          : '<span class="badge badge-dim">Pendiente</span>';
+    const statusBadge = allDone
+      ? '<span class="badge badge-green">✓ Completado</span>'
+      : someReported
+        ? '<span class="badge badge-gold">En progreso</span>'
+        : '<span class="badge badge-dim">Pendiente</span>';
 
-    const isUnique = f.link_type === 'unique';
     const link = `${location.href.split('?')[0]}?token=${f.token}`;
 
     // Territory badges — look up name by id or number
@@ -2464,10 +2431,7 @@ async function loadForms() {
     return `
     <div class="form-card">
       <div class="form-card-header">
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${isUnique ? '<span class="badge badge-gold" style="font-size:10px">🔗 Link único</span>' : ''}
-          ${tBadges}
-        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${tBadges}</div>
         ${statusBadge}
       </div>
       <h3 style="margin-bottom:2px">${f.host_name}</h3>
@@ -2477,18 +2441,14 @@ async function loadForms() {
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${link}</span>
       </div>
       <div class="form-card-actions" style="margin-top:10px">
-        ${isUnique ? `<button class="btn btn-gold" onclick="openAssignToUnique('${f.id}')">Asignar territorios</button>` : ''}
-        <button class="btn btn-ghost" onclick="deleteForm('${f.id}', ${isUnique})" style="color:var(--red);border-color:var(--red)">Eliminar</button>
+        <button class="btn btn-ghost" onclick="deleteForm('${f.id}')" style="color:var(--red);border-color:var(--red)">Eliminar</button>
       </div>
     </div>`;
   }).join('');
 }
 
-async function deleteForm(id, isUnique) {
-  const msg = isUnique
-    ? '¿Eliminar este Link Único? El publicador ya no podrá enviar reportes con este enlace.'
-    : '¿Eliminar este formulario?';
-  if (!confirm(msg)) return;
+async function deleteForm(id) {
+  if (!confirm('¿Eliminar este formulario?')) return;
   await sb(`territory_forms?id=eq.${id}`, { method:'DELETE', prefer:'return=minimal' });
   toast('Formulario eliminado'); loadForms(); loadDashboard();
 }
@@ -3059,10 +3019,7 @@ async function createForm() {
     const [id, num] = v.split(':');
     return { id, number: Number(num) };
   });
-
-  if (!hostVal || !date) { toast('Selecciona publicador y fecha', 'error'); return; }
-  // A Link Único can be created before any territory is assigned; a Link de un uso needs at least one.
-  if (currentFormMode !== 'unique' && !tPairs.length) { toast('Selecciona publicador, fecha y al menos un territorio', 'error'); return; }
+  if (!hostVal || !date || !tPairs.length) { toast('Selecciona publicador, fecha y al menos un territorio', 'error'); return; }
 
   // Check for duplicates by id
   const tIds = tPairs.map(p => p.id);
@@ -3072,75 +3029,36 @@ async function createForm() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> Generando...';
 
+  const token = genToken();
   const tNums = tPairs.map(p => p.number);
-  const nowIso = new Date().toISOString();
+  // territory_ids = array of UUIDs (new); territory_nums = array of numbers (compat); territory_num = first number (legacy)
+  const payload = { host_name: host, territory_num: tNums[0], territory_nums: tNums, territory_ids: tIds, assignment_date: date, token, congregation: getCong() };
 
   try {
-    if (currentFormMode === 'unique' && editingUniqueFormId) {
-      // Re-assign territories to an existing Link Único — same token, new cycle.
-      const payload = { territory_num: tNums[0] ?? null, territory_nums: tNums, territory_ids: tIds, assignment_date: date, cycle_started_at: nowIso };
-      const res = await sb(`territory_forms?id=eq.${editingUniqueFormId}`, { method:'PATCH', body: JSON.stringify(payload), prefer:'return=representation' });
-      const data = await res.json();
-      if (res.ok) {
-        const updated = Array.isArray(data) ? data[0] : data;
-        const token = updated?.token || formsCache.find(f => f.id === editingUniqueFormId)?.token;
-        showCreatedLink(token);
-        resetCreateFormFields();
-        toast('¡Territorios asignados al Link Único!');
-        loadForms(); loadDashboard();
-      } else {
-        console.error('Supabase error:', data);
-        toast(`Error: ${data?.message || data?.error || 'No se pudo actualizar'}`, 'error');
-      }
-    } else {
-      const token = genToken();
-      // territory_ids = array of UUIDs (new); territory_nums = array of numbers (compat); territory_num = first number (legacy)
-      const payload = {
-        host_name: host,
-        territory_num: tNums[0] ?? null,
-        territory_nums: tNums,
-        territory_ids: tIds,
-        assignment_date: date,
-        token,
-        congregation: getCong(),
-        link_type: currentFormMode === 'unique' ? 'unique' : 'single_use',
-        cycle_started_at: nowIso
-      };
-      const res = await sb('territory_forms', { method:'POST', body: JSON.stringify(payload), prefer: 'return=representation' });
-      const data = await res.json();
+    const res = await sb('territory_forms', { method:'POST', body: JSON.stringify(payload), prefer: 'return=representation' });
+    const data = await res.json();
 
-      if (res.ok) {
-        showCreatedLink(token);
-        resetCreateFormFields();
-        toast(currentFormMode === 'unique' ? '¡Link Único creado!' : '¡Formulario creado!');
-        loadForms(); loadDashboard();
-      } else {
-        console.error('Supabase error:', data);
-        toast(`Error: ${data?.message || data?.error || 'No se pudo crear'}`, 'error');
-      }
+    if (res.ok) {
+      const base = location.href.split('?')[0];
+      const link = `${base}?token=${token}`;
+      document.getElementById('created-link-url').textContent = link;
+      document.getElementById('created-link-box').classList.remove('hidden');
+      document.getElementById('cf-host').value = '';
+      for (let i = 1; i <= 3; i++) document.getElementById(`cf-territory-${i}`).value = '';
+      document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
+      toast('¡Formulario creado!');
+      loadForms(); loadDashboard();
+    } else {
+      console.error('Supabase error:', data);
+      toast(`Error: ${data?.message || data?.error || 'No se pudo crear'}`, 'error');
     }
   } catch (err) {
     console.error('Network error:', err);
     toast('Error de red. Verifica tu conexión.', 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> <span id="btn-create-form-label"></span>';
-    applyFormModeUI();
+    btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Generar enlace';
   }
-}
-
-function showCreatedLink(token) {
-  const base = location.href.split('?')[0];
-  const link = `${base}?token=${token}`;
-  document.getElementById('created-link-url').textContent = link;
-  document.getElementById('created-link-box').classList.remove('hidden');
-}
-
-function resetCreateFormFields() {
-  document.getElementById('cf-host').value = '';
-  for (let i = 1; i <= 3; i++) { const s = document.getElementById(`cf-territory-${i}`); if (s) s.value = ''; }
-  document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
-  editingUniqueFormId = null;
 }
 
 function copyCreatedLink() {
@@ -3193,81 +3111,20 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ── FORM TYPE (Link único vs Link de un uso) ──
-let currentFormMode = 'single_use'; // 'single_use' | 'unique'
-let editingUniqueFormId = null; // when set, submitting re-assigns territories to this existing Link Único
-
-function openFormTypeModal() {
-  document.getElementById('form-type-modal').classList.remove('hidden');
-}
-
-function chooseFormType(type) {
-  closeModal('form-type-modal');
-  toggleCreateForm(type);
-}
-
-function applyFormModeUI() {
-  const isUnique = currentFormMode === 'unique';
-  const titleEl = document.getElementById('cf-title');
-  const subtitleEl = document.getElementById('cf-subtitle');
-  const labelEl = document.getElementById('btn-create-form-label');
-  if (titleEl) titleEl.textContent = isUnique ? 'Nuevo Link Único' : 'Nuevo formulario';
-  if (subtitleEl && !editingUniqueFormId) {
-    subtitleEl.textContent = isUnique
-      ? 'Vincula este enlace a un publicador. Luego solo le asignas territorios, sin generar uno nuevo.'
-      : 'Puedes asignar hasta 3 territorios por enlace';
-  }
-  document.getElementById('unique-mode-hint').classList.toggle('hidden', !isUnique);
-  if (labelEl) labelEl.textContent = isUnique ? (editingUniqueFormId ? 'Actualizar territorios' : 'Crear Link Único') : 'Generar enlace';
-}
-
-function onHostSelectChange() {
-  if (currentFormMode !== 'unique') return;
-  const hostSel = document.getElementById('cf-host');
-  const hostName = hostSel.options[hostSel.selectedIndex]?.text || '';
-  const hint = document.getElementById('unique-mode-hint');
-  const existing = hostName ? formsCache.find(f => f.link_type === 'unique' && f.host_name === hostName) : null;
-  if (existing) {
-    editingUniqueFormId = existing.id;
-    hint.innerHTML = `Ya existe un <strong>Link Único</strong> para ${hostName}. Al continuar, se le asignarán estos territorios usando ese mismo enlace — no hace falta enviarle uno nuevo.`;
-  } else {
-    editingUniqueFormId = null;
-    hint.textContent = 'Este enlace quedará fijo para este publicador. La próxima vez solo tendrás que asignarle territorios nuevos, sin generar otro enlace.';
-  }
-  applyFormModeUI();
-}
-
-function openAssignToUnique(id) {
-  const f = formsCache.find(x => x.id === id);
-  if (!f) return;
-  toggleCreateForm('unique');
-  const hostSel = document.getElementById('cf-host');
-  hostSel.value = f.host_name;
-  editingUniqueFormId = id;
-  onHostSelectChange();
-  document.getElementById('create-form-inline').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function toggleCreateForm(mode) {
+function toggleCreateForm() {
   const box = document.getElementById('create-form-inline');
-  if (mode) {
-    currentFormMode = mode;
-    editingUniqueFormId = null;
-    box.classList.remove('hidden');
+  const isHidden = box.classList.contains('hidden');
+  box.classList.toggle('hidden');
+  if (isHidden) {
     populateTerritorySelect();
     populateBrothersSelect();
     document.getElementById('cf-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('created-link-box').classList.add('hidden');
-    document.getElementById('cf-host').value = '';
-    for (let i = 1; i <= 3; i++) { const s = document.getElementById(`cf-territory-${i}`); if (s) s.value = ''; }
-    applyFormModeUI();
   } else {
-    box.classList.add('hidden');
     document.getElementById('created-link-box').classList.add('hidden');
     document.getElementById('cf-host').value = '';
     for (let i = 1; i <= 3; i++) { const s = document.getElementById(`cf-territory-${i}`); if(s) s.value = ''; }
     document.getElementById('cf-date').value = '';
-    editingUniqueFormId = null;
   }
 }
 
@@ -3296,14 +3153,8 @@ async function initHostScreen(token) {
   const nums = hostFormData.territory_nums || (hostFormData.territory_num ? [hostFormData.territory_num] : []);
 
   // Load already-submitted reports for this form
-  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=territory_num,territory_id,created_at`, { method:'GET' });
-  const existingAll = await rRes.json();
-  // For a Link Único, only reports from the current assignment cycle count as "already done" —
-  // otherwise re-assigning the same territory later would show as instantly completed.
-  const cycleStart = hostFormData.cycle_started_at ? new Date(hostFormData.cycle_started_at).getTime() : 0;
-  const existing = cycleStart
-    ? existingAll.filter(r => !r.created_at || new Date(r.created_at).getTime() >= cycleStart)
-    : existingAll;
+  const rRes = await sb(`territory_reports?form_id=eq.${hostFormData.id}&select=territory_num,territory_id`, { method:'GET' });
+  const existing = await rRes.json();
   // hostReportedNums tracks the "slot key" — id if available, else number
   hostReportedNums = new Set(existing.map(r => r.territory_id || r.territory_num));
 
@@ -3341,21 +3192,6 @@ function renderHostOverview() {
   // Show all steps hidden, step-0 visible
   [1,2,3].forEach(s => document.getElementById(`host-step-${s}`)?.classList.add('hidden'));
   document.getElementById('host-step-0').classList.remove('hidden');
-
-  // Link Único before any territory has been assigned yet
-  if (nums.length === 0) {
-    sub.classList.add('hidden');
-    cardsEl.innerHTML = `
-      <div style="text-align:center;width:100%">
-        <div class="sent-icon" style="margin:0 auto 16px">
-          <svg width="32" height="32" fill="none" stroke="var(--gold)" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        </div>
-        <h2 style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px">Aún sin territorios</h2>
-        <p style="color:var(--text-muted);font-size:14px">Todavía no tienes territorios asignados en este enlace. Avísale a quien te lo envió.</p>
-      </div>`;
-    allDoneEl.classList.add('hidden');
-    return;
-  }
 
   if (allDone) {
     sub.classList.add('hidden');
