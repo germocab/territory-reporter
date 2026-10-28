@@ -511,6 +511,23 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 .sel-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .sel-on [data-form]{cursor:pointer;user-select:none}.sel-on [data-form] *{pointer-events:none}
 [data-form].sel{outline:3px solid var(--gold);outline-offset:2px;border-radius:var(--radius)}
+
+/* v10.1.1 floating sidebar + depth drop */
+.sidebar{position:fixed!important;top:14px;left:14px;bottom:14px;height:auto!important;width:220px;border:1px solid var(--border)!important;border-radius:26px;padding:20px 0!important;z-index:40;background:color-mix(in srgb,var(--surface) 40%,transparent)!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 10px 40px #0000001f;transition:transform .3s ease,opacity .3s ease}
+#admin-screen.sb-closed .sidebar{transform:translateX(-120%);opacity:0;pointer-events:none}
+.admin-main{padding-left:248px;transition:padding .3s ease}#admin-screen.sb-closed .admin-main{padding-left:0}
+.theme-fab{position:fixed!important;top:16px;left:16px;z-index:45;transition:left .3s ease}
+#admin-screen:not(.sb-closed) .theme-fab{left:252px}
+.admin-panel{padding-top:64px!important}
+.sb-foot{margin-top:6px;padding:0 14px 0 0;display:flex;align-items:center;justify-content:space-between}.sb-theme{width:34px;height:34px}
+@media(max-width:768px){.sidebar{display:flex!important}.admin-main{padding-left:0!important}#admin-screen{flex-direction:row!important}#admin-screen:not(.sb-closed) .theme-fab{left:16px}}
+.pl-days{perspective:900px}
+.pl-day{transform-style:preserve-3d;will-change:transform}
+.pl-day.over{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(1.03)!important;box-shadow:0 18px 36px #00000030}
+.pl-day.pl-drop{animation:plDepth .65s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes plDepth{0%{transform:rotateX(var(--dy,0deg)) rotateY(var(--dx,0deg)) scale(.95);box-shadow:0 2px 6px #0000001a}35%{transform:rotateX(calc(var(--dy,0deg)*-.5)) rotateY(calc(var(--dx,0deg)*-.5)) scale(1.04);box-shadow:0 22px 40px #00000033}70%{transform:rotateX(calc(var(--dy,0deg)*.2)) rotateY(calc(var(--dx,0deg)*.2)) scale(.99)}100%{transform:none}}
+.pl-day.pl-drop .pl-card:last-of-type{animation:plPop .65s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes plPop{0%{transform:translateZ(0) scale(1.25);box-shadow:0 30px 40px #0000003a}100%{transform:none}}
 </style>
 </head>
 <body>
@@ -538,10 +555,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 <div id="admin-screen" class="hidden">
   <!-- Sidebar -->
   <nav class="sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-icon">T</div>
-      <span>Territorios</span>
-    </div>
+
     <a class="nav-item active" onclick="showPanel('planner')" data-panel="planner"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programa</a>
     <a class="nav-item" onclick="showPanel('hosts')" data-panel="hosts"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg>Hosts</a>
     <a class="nav-item" onclick="showPanel('houses')" data-panel="houses"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Casas</a>
@@ -563,12 +577,12 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="ver">Reporter v10.1 · Terrenor 1.0</div>
+    <div class="sb-foot"><div class="ver">Reporter v10.1.1 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
   </nav>
 
   <!-- Main content -->
   <main class="admin-main">
-    <button class="theme-fab" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button>
+    <button class="theme-fab" id="sb-toggle" onclick="toggleSidebar()" title="Abrir / cerrar menú"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
 
     <div id="panel-planner" class="admin-panel active"><div id="pl-root"></div></div>
     <div id="panel-houses" class="admin-panel"><div id="hs-root"></div></div>
@@ -2735,7 +2749,11 @@ function plReset(){const s=PL.view==='s';if(s?PL.doneS:PL.done)return;DK(s?7:1).
 function plEdit(){if(PL.view==='s')PL.doneS=false;else PL.done=false;renderPlanner()}
 function plView(){PL.view=PL.view==='s'?'w':'s';PL.pop=null;renderPlanner()}
 function plCopy(k){navigator.clipboard.writeText(`${location.href.split('?')[0]}?token=${PL.days[k].token}`).then(()=>toast('¡Enlace copiado!'))}
-function plDrop(e,k){e.preventDefault();e.currentTarget.classList.remove('over');const id=e.dataTransfer.getData('text');if(PL.S[id])place(k,id)}
+function plOver(e,el){e.preventDefault();el.classList.add('over');const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;el.style.setProperty('--ry',(x*10).toFixed(2)+'deg');el.style.setProperty('--rx',(-y*10).toFixed(2)+'deg')}
+function plLeave(el){el.classList.remove('over');el.style.removeProperty('--rx');el.style.removeProperty('--ry')}
+function plDrop(e,k){e.preventDefault();const el=e.currentTarget,r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;plLeave(el);const id=e.dataTransfer.getData('text');if(PL.S[id]){place(k,id);requestAnimationFrame(()=>{const d=document.querySelector('.pl-day[data-k="'+k+'"]');if(!d)return;d.style.setProperty('--dx',(x*8).toFixed(1)+'deg');d.style.setProperty('--dy',(-y*8).toFixed(1)+'deg');d.classList.remove('pl-drop');void d.offsetWidth;d.classList.add('pl-drop');setTimeout(()=>d.classList.remove('pl-drop'),700)})}}
+function toggleSidebar(f){const o=document.getElementById('admin-screen').classList;if(f===undefined)o.toggle('sb-closed');else o.toggle('sb-closed',!f)}
+if(innerWidth<=768)document.addEventListener('DOMContentLoaded',()=>toggleSidebar(false));
 // "Done": one report-form link per day (territory_forms), house kept in config
 async function submitWeek(){const now=new Date().toISOString(),sun=PL.view==='s';
   for(const k of DK(sun?7:1)){const D=PL.days[k],ids=D.items.map(x=>x.tid);
@@ -2764,7 +2782,7 @@ function renderPlanner(){const el=document.getElementById('pl-root');if(!el)retu
   <div class="pl-pill"><b>${lbl}</b><span>${sun?dFmt(addD(PL.mon,6)):dFmt(PL.mon)+' al '+dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">${IC.fwd}</button>
   <div class="pl-act"><button class="pl-ic ${sun?'on':''}" title="Domingo / Semana" onclick="plView()">${IC.cal}</button>${dn0?`<button class="pl-ic" title="Editar" onclick="plEdit()">${IC.edit}</button>`:`<button class="pl-ic" title="Reiniciar semana" onclick="plReset()">${IC.reset}</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">${IC.check}</button>`:''}`}</div></div>
   ${nb?`<div class="pl-warn">Terrenor encontró datos en conflicto en ${nb} territorio${nb>1?'s':''} y no los recomendará hasta que los revises (toca el territorio).</div>`:''}
-  <div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="plDrop(event,${k})">
+  <div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" data-k="${k}" ondragover="plOver(event,this)" ondragleave="plLeave(this)" ondrop="plDrop(event,${k})">
     <h4>${dn(k)}</h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div>
   ${dn0?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGallery()">${IC.plus}</button></div></div>`}`}
 function sheet(h,w){document.getElementById('tr-box').className='tr-box'+(w?' wide':'');document.getElementById('tr-box').innerHTML=h;document.getElementById('tr-sheet').classList.remove('hidden')}
