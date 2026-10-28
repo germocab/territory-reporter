@@ -528,6 +528,25 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 @keyframes plDepth{0%{transform:rotateX(var(--dy,0deg)) rotateY(var(--dx,0deg)) scale(.95);box-shadow:0 2px 6px #0000001a}35%{transform:rotateX(calc(var(--dy,0deg)*-.5)) rotateY(calc(var(--dx,0deg)*-.5)) scale(1.04);box-shadow:0 22px 40px #00000033}70%{transform:rotateX(calc(var(--dy,0deg)*.2)) rotateY(calc(var(--dx,0deg)*.2)) scale(.99)}100%{transform:none}}
 .pl-day.pl-drop .pl-card:last-of-type{animation:plPop .65s cubic-bezier(.2,.9,.3,1.3)}
 @keyframes plPop{0%{transform:translateZ(0) scale(1.25);box-shadow:0 30px 40px #0000003a}100%{transform:none}}
+#panel-planner{background-image:radial-gradient(color-mix(in srgb,var(--text-dim) 70%,transparent) 1.3px,transparent 1.6px);background-size:24px 24px;min-height:100dvh}
+
+/* v10.3.1 */
+.pl-day{background:color-mix(in srgb,var(--surface2) 55%,transparent)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transform-style:flat!important}
+.admin-main:has(#panel-planner.active){background-image:radial-gradient(color-mix(in srgb,var(--text-dim) 70%,transparent) 1.3px,transparent 1.6px);background-size:24px 24px}
+#panel-planner{background:none!important}
+.sidebar{background:color-mix(in srgb,var(--surface) 40%,transparent)!important;-webkit-backdrop-filter:blur(20px) saturate(140%)!important;backdrop-filter:blur(20px) saturate(140%)!important}
+.pl-hwrap{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+.pl-house{display:inline-flex;align-items:center;gap:8px;padding:10px 16px!important;font-size:14px!important;border-radius:100px;box-shadow:0 6px 14px color-mix(in srgb,var(--gold) 35%,transparent);transition:transform .2s cubic-bezier(.3,1.4,.5,1),box-shadow .2s}
+.pl-house:hover{transform:translateY(-1px) scale(1.03)}.pl-house:active{transform:scale(.96)}
+.pl-house svg:first-child{width:17px;height:17px}.pl-house span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl-chev{transition:transform .3s cubic-bezier(.3,1.4,.5,1);flex-shrink:0}.pl-house.open .pl-chev{transform:rotate(180deg)}
+.pl-alts{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;transform-origin:top center;animation:plAlts .28s ease both}
+.pl-alt{margin:0!important;transform:none!important;font-size:13px!important;padding:8px 16px!important;box-shadow:0 4px 10px #0000001a;opacity:0;animation:plAltIn .38s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--i)*70ms + 60ms);transition:transform .15s}
+.pl-alt:hover{transform:scale(1.06)!important}
+.pl-none{color:var(--text-muted);animation:plAltIn .3s both}
+@keyframes plAlts{from{opacity:0;transform:scaleY(.6)}to{opacity:1;transform:none}}
+@keyframes plAltIn{from{opacity:0;transform:translateY(-12px) scale(.7)}to{opacity:1;transform:none}}
+.quiet .pl-card,.quiet .pl-day{animation:none!important}
 </style>
 </head>
 <body>
@@ -577,7 +596,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.2 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.3.1 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -2684,7 +2703,7 @@ async function loadWeek(){
   const isSun=f=>pdt(f.assignment_date).getDay()===0,live=f=>!CFG.resetAt||f.assignment_date>=CFG.resetAt,fid={};F.forEach(f=>fid[f.id]=f);
   const F2=F.filter(live),R2=R.filter(r=>fid[r.form_id]&&live(fid[r.form_id])),Fw=F2.filter(f=>!isSun(f)),Fs=F2.filter(isSun);
   const Rw=R2.filter(r=>!isSun(fid[r.form_id])),Rs=R2.filter(r=>isSun(fid[r.form_id]));
-  PL.T=T;PL.S=tState(T,Fw,Rw);PL.SS=tState(T,Fs,Rs);PL.hist=new Set(Fw.map(f=>f.assignment_date));PL.histS=new Set(Fs.map(f=>f.assignment_date));PL.bad=integrity(T,F2,R2);PL.done=false;PL.doneS=false;PL.fids={};PL.pop=null;
+  PL.T=T;PL.S=tState(T,Fw,Rw);PL.SS=tState(T,Fs,Rs);PL.hist=new Set(Fw.map(f=>f.assignment_date));PL.histS=new Set(Fs.map(f=>f.assignment_date));PL.bad=integrity(T,F2,R2);PL.uq=Object.fromEntries(F.filter(f=>f.link_type==='unique').map(f=>[f.id,f]));PL.done=false;PL.doneS=false;PL.fids={};PL.pop=null;
   PL.days={};[1,2,3,4,5,7].forEach(k=>PL.days[k]={items:[],house:null,exc:false});
   const mine=F.filter(f=>{const o=diff(f.assignment_date,PL.mon);return o>=0&&o<=6&&o!==5});
   PL.done=mine.some(f=>!isSun(f));PL.doneS=mine.some(isSun);
@@ -2725,8 +2744,9 @@ function trAct(a,j){const {k,tid,moving}=PL.cf,why=(document.getElementById('trW
   else if(tid)place(k,tid,{force:1,reason:why});
   else{const D=PL.days[k],c=check(k,D.items.map(x=>x.tid),moving);logExc(k,D.items.map(x=>x.tid),c,why);D.exc=true;renderPlanner()}}
 function plBad(k){const ids=PL.days[k].items.map(x=>x.tid);PL.cf={k,tid:null,moving:ids};conflict(check(k,ids,ids))}
-function plPop(k){if(isDone(k))return;PL.pop=PL.pop===k?null:k;renderPlanner()}
-function plHouse(k,id){PL.days[k].house=id;PL.pop=null;renderPlanner()}
+function plQuiet(f){const el=document.getElementById('pl-root');el.classList.add('quiet');f();setTimeout(()=>el.classList.remove('quiet'),500)}
+function plPop(k){if(isDone(k))return;plQuiet(()=>{PL.pop=PL.pop===k?null:k;renderPlanner()})}
+function plHouse(k,id){plQuiet(()=>{PL.days[k].house=id;PL.pop=null;renderPlanner()})}
 async function plWeek(n){PL.mon=addD(PL.mon,7*n);await loadWeek()}
 function plReset(){const s=PL.view==='s';if(s?PL.doneS:PL.done)return;DK(s?7:1).forEach(k=>PL.days[k]={items:[],house:null,exc:false});renderPlanner()}
 function plEdit(){if(PL.view==='s')PL.doneS=false;else PL.done=false;renderPlanner()}
@@ -2740,10 +2760,13 @@ if(innerWidth<=768)document.addEventListener('DOMContentLoaded',()=>toggleSideba
 // "Done": one report-form link per day (territory_forms), house kept in config
 async function submitWeek(){const now=new Date().toISOString(),sun=PL.view==='s';
   for(const k of DK(sun?7:1)){const D=PL.days[k],ids=D.items.map(x=>x.tid);
-    if(!ids.length){if(PL.fids[k]){await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'DELETE',prefer:'return=minimal'});delete PL.fids[k]}continue}
+    const ho=hostFor(k),lid=ho&&ho.formId&&(PL.uq||{})[ho.formId]?ho.formId:null;
+    if(!ids.length){if(PL.fids[k]&&!(PL.uq||{})[PL.fids[k]]){await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'DELETE',prefer:'return=minimal'})}delete PL.fids[k];continue}
     const nums=ids.map(i=>st(k)[i].t.number),h=CFG.houses.find(x=>x.id===D.house),
       body={host_name:(hostFor(k)||{}).name||'Sin host',territory_num:nums[0],territory_nums:nums,territory_ids:ids,assignment_date:addD(PL.mon,k-1),link_type:'single_use',cycle_started_at:now};
-    let r;if(PL.fids[k])r=await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'PATCH',body:JSON.stringify(body)});
+    let r;if(lid){delete body.link_type;if(PL.fids[k]&&PL.fids[k]!==lid&&!(PL.uq||{})[PL.fids[k]])await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'DELETE',prefer:'return=minimal'});PL.fids[k]=lid;r=await sb(`territory_forms?id=eq.${lid}`,{method:'PATCH',body:JSON.stringify(body),prefer:'return=representation'})}
+    else if(PL.fids[k]&&!(PL.uq||{})[PL.fids[k]])r=await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'PATCH',body:JSON.stringify(body)});
+    else if(PL.fids[k]){delete PL.fids[k];body.token=genToken();r=await sb('territory_forms',{method:'POST',body:JSON.stringify(body)})}
     else{body.token=genToken();r=await sb('territory_forms',{method:'POST',body:JSON.stringify(body)})}
     const a=await r.json();if(!r.ok){toast('Error: '+(a.message||'no se pudo guardar'),'error');return}
     const f=Array.isArray(a)?a[0]:a;PL.fids[k]=f.id;D.token=f.token;
@@ -2757,7 +2780,7 @@ const card=(t,x,k)=>`<div class="pl-card ${x&&x.carry?'carry':''}" ${k?'':`dragg
 function houseUI(k,D){if(!D.items.length)return'';const cur=CFG.houses.find(h=>h.id===D.house);
   if(!cur)return D.exc?`<button class="pl-house exc">Excepción · sin casa</button>`:`<button class="pl-house bad" onclick="plBad(${k})">Sin casa válida</button>`;
   const alts=PL.pop===k?houses(addD(PL.mon,k-1),D.items.map(x=>x.tid)).filter(h=>h.id!==D.house):[];
-  return `<div style="text-align:center"><button class="pl-house" onclick="plPop(${k})">${IC.house}&nbsp;${cur.name}</button>${alts.map(h=>`<button class="pl-alt" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')}</div>`}
+  return `<div class="pl-hwrap"><button class="pl-house ${PL.pop===k?'open':''}" onclick="plPop(${k})">${IC.house}<span>${cur.name}</span><svg class="pl-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>${PL.pop===k?`<div class="pl-alts">${alts.map((h,i)=>`<button class="pl-alt" style="--i:${i}" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')||'<small class="pl-none">Sin otras casas</small>'}</div>`:''}</div>`}
 function renderPlanner(){const el=document.getElementById('pl-root');if(!el)return;const sun=PL.view==='s',ks=DK(sun?7:1),dn0=sun?PL.doneS:PL.done,full=ks.every(k=>PL.days[k].items.length),cur=monOf(new Date());
   const lbl=sun?(PL.mon===cur?'Este fin de semana':'Fin de semana'):PL.mon===cur?'Esta semana':PL.mon===addD(cur,7)?'Próxima semana':'Semana',nb=Object.keys(PL.bad).length;
   const rec=recommend(addD(PL.mon,sun?6:2),null,true,sun).slice(0,5);
@@ -2789,10 +2812,12 @@ function trNb(a,b){if(isNear(a,b)){CFG.nb[a]=(CFG.nb[a]||[]).filter(x=>x!==b);CF
 const hostFor=k=>(CFG.hosts||[]).find(h=>h.day===k),HD=[[1,'Lun'],[2,'Mar'],[3,'Mié'],[4,'Jue'],[5,'Vie'],[7,'Dom']];let HO=null;
 function renderHosts(){const el=document.getElementById('ho-root');if(!el)return;
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:28px;flex-wrap:wrap"><div><p class="panel-title" style="margin-bottom:4px">Hosts</p><p class="panel-subtitle" style="margin-bottom:0">Quien recibe el enlace de cada día del Programa</p></div><button class="btn btn-gold" onclick="hoEdit()">${IC.plus} Nuevo host</button></div>
-  <div class="forms-grid">${(CFG.hosts||[]).sort((a,b)=>a.day-b.day).map(h=>`<div class="form-card"><h3>${h.name}</h3><p>${h.day?(HD.find(d=>d[0]===h.day)||[0,'–'])[1]:'Sin día'}</p><div class="form-card-actions" style="margin-top:12px"><button class="btn btn-ghost" onclick="hoEdit('${h.id}')">Editar</button></div></div>`).join('')||'<div class="empty-state"><h3>Sin hosts aún</h3><p>Crea un host y asígnalo a un día fijo.</p></div>'}</div>`}
+  <div class="forms-grid">${(CFG.hosts||[]).sort((a,b)=>a.day-b.day).map(h=>`<div class="form-card"><h3>${h.name}</h3><p>${h.day?(HD.find(d=>d[0]===h.day)||[0,'–'])[1]:'Sin día'} · ${h.formId&&(PL.uq||{})[h.formId]?'Link Único vinculado':'Enlace nuevo cada semana'}</p><div class="form-card-actions" style="margin-top:12px"><button class="btn btn-ghost" onclick="hoEdit('${h.id}')">Editar</button></div></div>`).join('')||'<div class="empty-state"><h3>Sin hosts aún</h3><p>Crea un host y asígnalo a un día fijo.</p></div>'}</div>`}
 function hoEdit(id){const h=(CFG.hosts||[]).find(x=>x.id===id);HO=h?{...h}:{id:genToken(),name:'',day:null,isNew:1};hoDraw()}
 function hoDraw(){sheet(`<h2 style="font-size:20px;margin-bottom:14px">${HO.isNew?'Nuevo host':'Editar host'}</h2><label>Nombre</label><input value="${HO.name}" placeholder="Ej: Nico" oninput="HO.name=this.value">
   <label style="margin-top:14px">Día fijo</label>${HD.map(([d,l])=>`<span class="tr-chip ${HO.day===d?'on':''}" onclick="HO.day=${d};hoDraw()">${l}</span>`).join('')}
+  <label style="margin-top:14px">Link Único existente (el host usará siempre este enlace)</label>
+  <span class="tr-chip ${!HO.formId?'on':''}" onclick="HO.formId=null;hoDraw()">Ninguno</span>${Object.values(PL.uq||{}).filter(f=>!(CFG.hosts||[]).some(h=>h.id!==HO.id&&h.formId===f.id)).map(f=>`<span class="tr-chip ${HO.formId===f.id?'on':''}" onclick="HO.formId='${f.id}';hoDraw()">${f.host_name||'Sin nombre'} · …${(f.token||'').slice(-4)}</span>`).join('')||'<small style="color:var(--text-muted)">No hay Links Únicos creados</small>'}
   <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-gold" onclick="hoSave()">Guardar</button><button class="btn btn-ghost" onclick="trClose()">Cancelar</button>${HO.isNew?'':`<button class="btn btn-ghost" style="color:var(--red);margin-left:auto" onclick="hoDel()">Eliminar</button>`}</div>`)}
 async function hoSave(){if(!HO.name.trim()||!HO.day){toast('Escribe el nombre y elige un día','error');return}const n=!!HO.isNew;delete HO.isNew;HO.name=HO.name.trim();
   CFG.hosts=(CFG.hosts||[]).filter(h=>h.day!==HO.day||h.id===HO.id);CFG.hosts=n?[...CFG.hosts,HO]:CFG.hosts.map(h=>h.id===HO.id?HO:h);
