@@ -471,7 +471,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 .btn-gold{color:#fff!important}.btn-gold:hover{background:#4d8ff0}
 [style*="color:#0f0f0f"]{color:#fff!important}
 .login-logo,.sidebar-logo-icon,.sidebar-logo span,.login-card h1,.panel-title,[style*="DM Serif"]{font-family:'Figtree',sans-serif!important;font-style:normal}
-.ver{font-size:11px;color:var(--text-dim);padding:10px 20px}
+.ver{font-size:11px;color:var(--text-dim);padding:10px 20px 0}.admin-main{position:relative}.admin-panel{padding-top:44px}.theme-fab{position:absolute;top:16px;left:16px;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5}.theme-fab:hover{border-color:var(--gold);color:var(--gold)}
 .pl-top{display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 28px;position:relative}
 .pl-ic{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--gold);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:.15s;flex-shrink:0}
 .pl-ic:hover{background:var(--gold-pale)}.pl-ic.on{background:var(--gold);color:#fff;border-color:var(--gold)}
@@ -485,7 +485,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 .pl-day.carry h4{color:#e8541c;opacity:1}
 .pl-card{position:relative;background:var(--surface);border-radius:18px;box-shadow:0 6px 18px #0000001a;padding:16px 10px 10px;width:100%;max-width:150px;cursor:pointer;text-align:center;animation:fadeUp .3s ease;transition:transform .15s}
 .pl-card:hover{transform:translateY(-2px)}.pl-card.carry{outline:2px solid #e8541c}
-.pl-card svg{width:100%;max-height:70px}
+.pl-map{height:72px;width:100%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}.pl-map svg{width:100%!important;height:100%!important;max-height:72px!important;max-width:100%;display:block;preserve-aspect-ratio:xMidYMid meet}.pl-rec .pl-card{flex:0 0 112px;height:128px;box-sizing:border-box}.pl-map b{font-size:28px}.pl-card{padding-bottom:22px}
 .pl-n{position:absolute;top:-10px;left:50%;transform:translateX(-50%);min-width:24px;height:24px;border-radius:12px;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 7px}
 .pl-ring{position:absolute;right:8px;bottom:8px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-dim)}
 .pl-rm{position:absolute;top:2px;right:6px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px}
@@ -508,6 +508,9 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 .tr-chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}.tr-chip.n{background:#dcf7bf;color:#1d3fc4;border-color:#dcf7bf}
 .tr-note{background:var(--surface2);border-radius:14px;padding:12px 14px;font-size:13px;margin:8px 0;line-height:1.5}
 .tr-note.soft{background:#fff4d6;color:#7a5400}.tr-note.hard{background:#ffe5e2;color:#9a2a20}
+.sel-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.sel-on [data-form]{cursor:pointer;user-select:none}.sel-on [data-form] *{pointer-events:none}
+[data-form].sel{outline:3px solid var(--gold);outline-offset:2px;border-radius:var(--radius)}
 </style>
 </head>
 <body>
@@ -539,12 +542,10 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       <div class="sidebar-logo-icon">T</div>
       <span>Territorios</span>
     </div>
-    <a class="nav-item active" onclick="showPanel('planner')" data-panel="planner"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planificador</a>
+    <a class="nav-item active" onclick="showPanel('planner')" data-panel="planner"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programa</a>
+    <a class="nav-item" onclick="showPanel('hosts')" data-panel="hosts"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg>Hosts</a>
     <a class="nav-item" onclick="showPanel('houses')" data-panel="houses"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Casas</a>
-    <a class="nav-item" onclick="showPanel('dashboard')" data-panel="dashboard">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </a>
+    <a class="nav-item" onclick="showPanel('terrenor')" data-panel="terrenor"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Terrenor</a>
     <a class="nav-item" onclick="showPanel('forms')" data-panel="forms">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Formularios
@@ -554,30 +555,27 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       Reportes
     </a>
     <a class="nav-item" onclick="showPanel('territories')" data-panel="territories">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
       Territorios
     </a>
 
-    <div class="ver">Reporter v10 · Terrenor 1.0</div>
-    <button class="theme-toggle" onclick="toggleTheme()" id="sidebar-theme-btn">
-      <span class="theme-toggle-icon" id="sidebar-theme-icon"></span>
-      <span id="sidebar-theme-label">Modo claro</span>
-    </button>
-    <a class="nav-item" onclick="doLogout()" style="color:var(--red)">
+    <a class="nav-item" onclick="doLogout()" style="color:var(--red);margin-top:auto">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
+    <div class="ver">Reporter v10.1 · Terrenor 1.0</div>
   </nav>
 
   <!-- Main content -->
   <main class="admin-main">
+    <button class="theme-fab" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button>
 
     <div id="panel-planner" class="admin-panel active"><div id="pl-root"></div></div>
     <div id="panel-houses" class="admin-panel"><div id="hs-root"></div></div>
-    <!-- ── DASHBOARD ── -->
-    <div id="panel-dashboard" class="admin-panel">
-      <p class="panel-title">Dashboard</p>
-      <p class="panel-subtitle">Resumen general de la actividad</p>
+    <div id="panel-hosts" class="admin-panel"><div id="ho-root"></div></div>
+    <div id="panel-terrenor" class="admin-panel"><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0 · resumen de actividad y ajustes del algoritmo</p>
+<div id="dash-wrap">
+      
       <div class="stats-grid" id="stats-grid">
         <div class="stat-card"><div class="stat-num" id="stat-total-forms">–</div><div class="stat-label">Formularios enviados</div></div>
         <div class="stat-card"><div class="stat-num" id="stat-total-reports">–</div><div class="stat-label">Reportes recibidos</div></div>
@@ -603,7 +601,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
         </div>
       </div>
     </div>
-
+<div id="tn-root" style="margin-top:28px"></div></div>
     <!-- ── FORMS LIST ── -->
     <div id="panel-forms" class="admin-panel">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap">
@@ -678,6 +676,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
         </div>
       </div>
 
+      <div class="sel-bar" id="sel-bar-forms"></div>
       <div id="forms-grid" class="forms-grid">
         <div class="empty-state"><div class="spinner"></div></div>
       </div>
@@ -691,6 +690,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
         <span id="reports-count" style="font-size:13px;color:var(--text-muted)"></span>
         <button class="btn btn-ghost" onclick="loadReports()" style="padding:7px 14px;font-size:12px">↺ Actualizar</button>
       </div>
+      <div class="sel-bar" id="sel-bar-reports"></div>
       <div id="reports-cards">
         <div style="text-align:center;padding:60px;color:var(--text-muted)"><div class="spinner"></div></div>
       </div>
@@ -958,7 +958,7 @@ function applyTheme(mode, save = true) {
   if (save) localStorage.setItem('theme', mode);
   updateThemeButtons(mode);
   // Redraw charts so grid/label colors match new theme
-  const dashboardActive = document.getElementById('panel-dashboard')?.classList.contains('active');
+  const dashboardActive = document.getElementById('panel-terrenor')?.classList.contains('active');
   if (dashboardActive) setTimeout(() => loadDashboard(), 50);
 }
 
@@ -982,6 +982,7 @@ function updateThemeButtons(mode) {
   const icon = document.getElementById('sidebar-theme-icon');
   const label = document.getElementById('sidebar-theme-label');
   if (icon) icon.innerHTML = makeThemeIcon(isDark, 15, 2);
+  const mi = document.getElementById('main-theme-icon'); if (mi) mi.innerHTML = makeThemeIcon(isDark, 18, 2.6);
   if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
   // Host floating button — heavier stroke, inherits --text color via CSS
   const hostIcon = document.getElementById('host-theme-icon');
@@ -1090,6 +1091,8 @@ function showPanel(name) {
   if (name === 'dashboard') loadDashboard();
   if (name === 'planner') loadWeek();
   if (name === 'houses') renderHouses();
+  if (name === 'hosts') renderHosts();
+  if (name === 'terrenor') { renderTerrenor(); loadDashboard(); }
 }
 
 // ── DASHBOARD ──
@@ -1221,7 +1224,7 @@ async function loadForms() {
     }).join('');
 
     return `
-    <div class="form-card">
+    <div class="form-card" data-form="${f.id}">
       <div class="form-card-header">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${isUnique ? '<span class="badge badge-gold" style="font-size:10px">🔗 Link único</span>' : ''}
@@ -1355,7 +1358,7 @@ async function loadReports() {
     }).join(`<div style="width:1px;background:var(--border);align-self:stretch;margin:0 4px"></div>`);
 
     return `
-    <div class="report-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;min-width:260px"
+    <div class="report-card" data-form="${formId}" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s;min-width:260px"
       onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border)'">
       <div style="padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
         <div style="font-weight:600;font-size:14px">${hostName}</div>
@@ -2610,9 +2613,18 @@ async function submitReport() {
 // Hard rules: house near territory + available that weekday, territory completed whole, max interval, clean data.
 // Soft rules: minimum interval, nearby-only for additional territory (eligibility). Exceptions are always logged.
 // ════════════════════════════════════════
-const TR={min:12,max:30},DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],MN=['Octubre'];
+const ic=(p,z=18,w=2.8)=>`<svg width="${z}" height="${z}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const IC={back:ic('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>'),fwd:ic('<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>'),
+cal:ic('<rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
+plus:ic('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',20,3.2),reset:ic('<polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/>'),
+check:ic('<polyline points="20 6 9 17 4 12"/>',18,3.4),edit:ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
+link:ic('<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',16),
+x:ic('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',14,3.2),sort:ic('<path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/>'),
+house:ic('<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',13,2.8)};
+const TR={min:12,max:30,smin:28,smax:90},DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],MN=['Octubre'];
 const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-let CFG={houses:[],nb:{},exc:[],forms:{}},PL={mon:null,days:{},fids:{},done:false,pop:null,T:[],S:{},bad:{},hist:new Set(),cf:null},HS=null;
+const st=k=>k===7?PL.SS:PL.S,isDone=k=>k===7?PL.doneS:PL.done,DK=k=>k===7?[7]:[1,2,3,4,5],dn=k=>DN[k%7];
+let CFG={houses:[],nb:{},exc:[],forms:{},resetAt:null},PL={view:'w',SS:{},doneS:false,mon:null,days:{},fids:{},done:false,pop:null,T:[],S:{},bad:{},hist:new Set(),cf:null},HS=null;
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const pdt=s=>new Date(s+'T12:00:00'),addD=(s,n)=>{const d=pdt(s);d.setDate(d.getDate()+n);return ymd(d)},diff=(a,b)=>Math.round((pdt(a)-pdt(b))/864e5);
 const monOf=d=>{const x=new Date(d);x.setHours(12);x.setDate(x.getDate()-((x.getDay()+6)%7));return ymd(x)};
@@ -2620,9 +2632,11 @@ const dFmt=s=>{const d=pdt(s);return `${d.getDate()} de ${MES[d.getMonth()]}`};
 const rows=async p=>{try{const r=await sb(p,{method:'GET'});const a=await r.json();return Array.isArray(a)?a:[]}catch(e){return[]}};
 
 // ── config (houses, nearby territories, exception log): Supabase table terrenor_config, localStorage fallback ──
+function applyCfg(){CFG.hosts=CFG.hosts||[];TR.min=CFG.min||12;TR.max=CFG.max||30;TR.smin=CFG.smin||28;TR.smax=CFG.smax||90}
 async function loadCfg(){
-  try{const a=await rows('terrenor_config?id=eq.main&select=data');if(a[0]&&a[0].data){Object.assign(CFG,a[0].data);return}}catch(e){}
+  try{const a=await rows('terrenor_config?id=eq.main&select=data');if(a[0]&&a[0].data){Object.assign(CFG,a[0].data);applyCfg();return}}catch(e){}
   try{Object.assign(CFG,JSON.parse(localStorage.getItem('terrenor_cfg')||'{}'))}catch(e){}
+  applyCfg()
 }
 async function saveCfg(){
   localStorage.setItem('terrenor_cfg',JSON.stringify(CFG));
@@ -2649,41 +2663,49 @@ function integrity(T,F,R){const bad={},seen={};
   F.forEach(f=>(f.territory_ids||[]).forEach(id=>{const k=id+f.assignment_date;if(seen[k]&&seen[k]!==f.id)bad[id]='Aparece asignado dos veces el mismo día en registros distintos.';seen[k]=f.id}));return bad}
 // recommendations: oldest completion first; unfinished territories are handled by carry-over, never here.
 // With `near` (an unfinished territory is on the same day) geography is an eligibility rule, not a preference.
-function recommend(date,near,noHouse){const used=new Set(Object.values(PL.days).flatMap(d=>d.items.map(x=>x.tid)));
-  return Object.values(PL.S).filter(s=>!s.partial&&!used.has(s.t.id)&&!PL.bad[s.t.id]).map(s=>({t:s.t,d:s.last?diff(date,s.last):999}))
-    .filter(x=>x.d>=TR.min&&(!near||near.some(n=>isNear(n,x.t.id)))&&(noHouse||houses(date,[...(near||[]),x.t.id]).length)).sort((a,b)=>b.d-a.d||a.t.number-b.t.number)}
+function recommend(date,near,noHouse,sun){const k0=sun?7:1,min=sun?TR.smin:TR.min,used=new Set(DK(k0).flatMap(k=>PL.days[k].items.map(x=>x.tid)));
+  return Object.values(st(k0)).filter(s=>!s.partial&&!used.has(s.t.id)&&!PL.bad[s.t.id]).map(s=>({t:s.t,d:s.last?diff(date,s.last):999}))
+    .filter(x=>x.d>=min&&(!near||near.some(n=>isNear(n,x.t.id)))&&(noHouse||houses(date,[...(near||[]),x.t.id]).length)).sort((a,b)=>b.d-a.d||a.t.number-b.t.number)}
 // validate putting `tids` on day k. `moving` = territories that would change day (for the "move" options)
-function check(k,tids,moving){const date=addD(PL.mon,k-1),issues=[],opts=[],hs=houses(date,tids),num=i=>'T'+PL.S[i].t.number;
-  tids.forEach(i=>{const s=PL.S[i],d=s.last?diff(date,s.last):null;
-    if(d!==null&&d<TR.min)issues.push({soft:1,t:`${num(i)} se completó hace ${d} días y su intervalo mínimo es de ${TR.min}.`});
-    if(d!==null&&d>TR.max)issues.push({soft:1,t:`${num(i)} supera el intervalo máximo de ${TR.max} días.`})});
+function check(k,tids,moving){const S=st(k),mn=k===7?TR.smin:TR.min,mx=k===7?TR.smax:TR.max,date=addD(PL.mon,k-1),issues=[],opts=[],hs=houses(date,tids),num=i=>'T'+S[i].t.number;
+  tids.forEach(i=>{const s=S[i],d=s.last?diff(date,s.last):null;
+    if(d!==null&&d<mn)issues.push({soft:1,t:`${num(i)} se completó hace ${d} días y su intervalo mínimo es de ${mn}.`});
+    if(d!==null&&d>mx)issues.push({soft:1,t:`${num(i)} supera el intervalo máximo de ${mx} días.`})});
   if(!hs.length){issues.push({t:`No hay una casa disponible el ${DN[pdt(date).getDay()]} que esté cerca de ${tids.map(num).join(' y ')}.`});
-    for(let j=1;j<=5;j++){if(j===k)continue;const all=[...PL.days[j].items.map(x=>x.tid),...moving.filter(m=>!PL.days[j].items.some(x=>x.tid===m))];
+    for(let j=1;j<=5&&k!==7;j++){if(j===k)continue;const all=[...PL.days[j].items.map(x=>x.tid),...moving.filter(m=>!PL.days[j].items.some(x=>x.tid===m))];
       if(all.length<=3&&houses(addD(PL.mon,j-1),all).length)opts.push({j,label:`Mover al ${DN[j]}`})}}
   return{hs,issues,opts}}
-function logExc(k,tids,c,why){CFG.exc.push({date:addD(PL.mon,k-1),territories:tids.map(i=>PL.S[i].t.number),rule:c.issues.map(i=>i.t).join(' | '),why:why||'(sin motivo)',by:'Encargado de territorios',at:new Date().toISOString()});saveCfg()}
+function logExc(k,tids,c,why){CFG.exc.push({date:addD(PL.mon,k-1),territories:tids.map(i=>st(k)[i].t.number),rule:c.issues.map(i=>i.t).join(' | '),why:why||'(sin motivo)',by:'Encargado de territorios',at:new Date().toISOString()});saveCfg()}
 
 // ── planner state ──
 async function initPlanner(){await loadCfg();PL.mon=monOf(new Date());await loadWeek()}
 async function loadWeek(){
   const [T,F,R]=await Promise.all([rows('territories?select=*&order=number.asc'),rows('territory_forms?select=*'),rows('territory_reports?select=*')]);
-  PL.T=T;PL.S=tState(T,F,R);PL.hist=new Set(F.map(f=>f.assignment_date));PL.bad=integrity(T,F,R);PL.done=false;PL.fids={};PL.pop=null;
-  PL.days={};for(let k=1;k<=5;k++)PL.days[k]={items:[],house:null,exc:false};
-  const mine=F.filter(f=>{const o=diff(f.assignment_date,PL.mon);return o>=0&&o<=4});
-  if(mine.length){PL.done=true;mine.forEach(f=>{const k=diff(f.assignment_date,PL.mon)+1,m=CFG.forms[f.id]||{},
+  const isSun=f=>pdt(f.assignment_date).getDay()===0,live=f=>!CFG.resetAt||f.assignment_date>=CFG.resetAt,fid={};F.forEach(f=>fid[f.id]=f);
+  const F2=F.filter(live),R2=R.filter(r=>fid[r.form_id]&&live(fid[r.form_id])),Fw=F2.filter(f=>!isSun(f)),Fs=F2.filter(isSun);
+  const Rw=R2.filter(r=>!isSun(fid[r.form_id])),Rs=R2.filter(r=>isSun(fid[r.form_id]));
+  PL.T=T;PL.S=tState(T,Fw,Rw);PL.SS=tState(T,Fs,Rs);PL.hist=new Set(Fw.map(f=>f.assignment_date));PL.histS=new Set(Fs.map(f=>f.assignment_date));PL.bad=integrity(T,F2,R2);PL.done=false;PL.doneS=false;PL.fids={};PL.pop=null;
+  PL.days={};[1,2,3,4,5,7].forEach(k=>PL.days[k]={items:[],house:null,exc:false});
+  const mine=F.filter(f=>{const o=diff(f.assignment_date,PL.mon);return o>=0&&o<=6&&o!==5});
+  PL.done=mine.some(f=>!isSun(f));PL.doneS=mine.some(isSun);
+  if(mine.length){mine.forEach(f=>{const k=diff(f.assignment_date,PL.mon)+1,m=CFG.forms[f.id]||{},
     ids=f.territory_ids||(f.territory_nums||[]).map(n=>(T.find(t=>t.number===n)||{}).id).filter(Boolean);
     PL.fids[k]=f.id;PL.days[k]={items:ids.map(t=>({tid:t,carry:(m.carry||{})[t]||null})),house:m.house||null,token:f.token,exc:false}})}
-  else autoPlan();
-  renderPlanner();renderHouses()}
+  if(!PL.done)autoPlan();if(!PL.doneS)autoSunday();
+  renderPlanner();renderHouses();renderHosts()}
 // Terrenor's weekly job: unfinished -> remaining manzanas same weekday (orange); finished/unreported -> new territory same weekday;
 // 1-3 manzanas left -> also add a NEW nearby territory alongside.
+function autoSunday(){const D=PL.days[7],date=addD(PL.mon,6);
+  const p=Object.values(PL.SS).find(s=>s.partial&&s.worked&&diff(s.worked,PL.mon)<0);
+  if(p){place(7,p.t.id,{carry:p.remaining,auto:1});return}
+  if(!PL.histS.has(addD(date,-7)))return;const r=recommend(date,null,false,true);if(r[0])place(7,r[0].t.id,{auto:1})}
 function autoPlan(){const prev=addD(PL.mon,-7);
   Object.values(PL.S).filter(s=>s.partial&&s.worked&&diff(s.worked,PL.mon)<0).forEach(s=>{const wd=(pdt(s.worked).getDay()+6)%7+1;if(wd<=5&&!PL.days[wd].items.length)place(wd,s.t.id,{carry:s.remaining,auto:1})});
   for(let k=1;k<=5;k++){const D=PL.days[k],date=addD(PL.mon,k-1),nearly=D.items.length&&D.items.every(x=>x.carry&&x.carry.length<=3);
     if(D.items.length&&!nearly)continue;if(!D.items.length&&!PL.hist.has(addD(prev,k-1)))continue;
     const r=recommend(date,nearly?D.items.map(x=>x.tid):null);if(r[0])place(k,r[0].t.id,{auto:1})}}
-function place(k,tid,o={}){const D=PL.days[k];if(PL.done)return;
-  if(Object.values(PL.days).some(d=>d.items.some(x=>x.tid===tid))){toast('Ya está asignado esta semana','error');return}
+function place(k,tid,o={}){const D=PL.days[k];if(isDone(k))return;
+  if(DK(k).some(j=>PL.days[j].items.some(x=>x.tid===tid))){toast('Ya está asignado esta semana','error');return}
   if(D.items.length>=3){toast('Máximo 3 territorios por día','error');return}
   const c=check(k,[...D.items.map(x=>x.tid),tid],[tid]);
   if(c.issues.length&&!o.force&&!o.auto){PL.cf={k,tid,moving:[tid]};return conflict(c)}
@@ -2706,59 +2728,75 @@ function trAct(a,j){const {k,tid,moving}=PL.cf,why=(document.getElementById('trW
   else if(tid)place(k,tid,{force:1,reason:why});
   else{const D=PL.days[k],c=check(k,D.items.map(x=>x.tid),moving);logExc(k,D.items.map(x=>x.tid),c,why);D.exc=true;renderPlanner()}}
 function plBad(k){const ids=PL.days[k].items.map(x=>x.tid);PL.cf={k,tid:null,moving:ids};conflict(check(k,ids,ids))}
-function plPop(k){if(PL.done)return;PL.pop=PL.pop===k?null:k;renderPlanner()}
+function plPop(k){if(isDone(k))return;PL.pop=PL.pop===k?null:k;renderPlanner()}
 function plHouse(k,id){PL.days[k].house=id;PL.pop=null;renderPlanner()}
 async function plWeek(n){PL.mon=addD(PL.mon,7*n);await loadWeek()}
-function plReset(){if(PL.done)return;for(let k=1;k<=5;k++)PL.days[k]={items:[],house:null,exc:false};renderPlanner()}
-function plEdit(){PL.done=false;renderPlanner()}
+function plReset(){const s=PL.view==='s';if(s?PL.doneS:PL.done)return;DK(s?7:1).forEach(k=>PL.days[k]={items:[],house:null,exc:false});renderPlanner()}
+function plEdit(){if(PL.view==='s')PL.doneS=false;else PL.done=false;renderPlanner()}
+function plView(){PL.view=PL.view==='s'?'w':'s';PL.pop=null;renderPlanner()}
 function plCopy(k){navigator.clipboard.writeText(`${location.href.split('?')[0]}?token=${PL.days[k].token}`).then(()=>toast('¡Enlace copiado!'))}
 function plDrop(e,k){e.preventDefault();e.currentTarget.classList.remove('over');const id=e.dataTransfer.getData('text');if(PL.S[id])place(k,id)}
 // "Done": one report-form link per day (territory_forms), house kept in config
-async function submitWeek(){const now=new Date().toISOString();
-  for(let k=1;k<=5;k++){const D=PL.days[k],ids=D.items.map(x=>x.tid);
+async function submitWeek(){const now=new Date().toISOString(),sun=PL.view==='s';
+  for(const k of DK(sun?7:1)){const D=PL.days[k],ids=D.items.map(x=>x.tid);
     if(!ids.length){if(PL.fids[k]){await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'DELETE',prefer:'return=minimal'});delete PL.fids[k]}continue}
-    const nums=ids.map(i=>PL.S[i].t.number),h=CFG.houses.find(x=>x.id===D.house),
-      body={host_name:h?h.name:'Sin casa',territory_num:nums[0],territory_nums:nums,territory_ids:ids,assignment_date:addD(PL.mon,k-1),link_type:'single_use',cycle_started_at:now};
+    const nums=ids.map(i=>st(k)[i].t.number),h=CFG.houses.find(x=>x.id===D.house),
+      body={host_name:(hostFor(k)||{}).name||'Sin host',territory_num:nums[0],territory_nums:nums,territory_ids:ids,assignment_date:addD(PL.mon,k-1),link_type:'single_use',cycle_started_at:now};
     let r;if(PL.fids[k])r=await sb(`territory_forms?id=eq.${PL.fids[k]}`,{method:'PATCH',body:JSON.stringify(body)});
     else{body.token=genToken();r=await sb('territory_forms',{method:'POST',body:JSON.stringify(body)})}
     const a=await r.json();if(!r.ok){toast('Error: '+(a.message||'no se pudo guardar'),'error');return}
     const f=Array.isArray(a)?a[0]:a;PL.fids[k]=f.id;D.token=f.token;
     CFG.forms[f.id]={house:D.house,carry:Object.fromEntries(D.items.filter(x=>x.carry).map(x=>[x.tid,x.carry]))}}
-  await saveCfg();PL.done=true;toast('Programa guardado ✓');renderPlanner();loadForms();loadDashboard()}
+  await saveCfg();if(sun)PL.doneS=true;else PL.done=true;toast('Programa guardado ✓');renderPlanner();loadForms();loadDashboard()}
 
 // ── render ──
 const mini=t=>t.svg_data?buildPreviewSvg(t.svg_data,t.manzanas||[],new Set(),false,true):`<b style="font-size:28px;color:var(--text)">${t.number}</b>`;
 const card=(t,x,k)=>`<div class="pl-card ${x&&x.carry?'carry':''}" ${k?'':`draggable="true" ondragstart="event.dataTransfer.setData('text','${t.id}')"`} onclick="trDetail('${t.id}')">
-  <span class="pl-n" style="background:${extractTerritoryColor(t)}">${t.number}</span>${k&&!PL.done?`<button class="pl-rm" onclick="event.stopPropagation();plRm(${k},'${t.id}')">×</button>`:''}${mini(t)}<i class="pl-ring"></i></div>`;
+  <span class="pl-n" style="background:${extractTerritoryColor(t)}">${t.number}</span>${k&&!isDone(k)?`<button class="pl-rm" onclick="event.stopPropagation();plRm(${k},'${t.id}')">${IC.x}</button>`:''}<div class="pl-map">${mini(t)}</div><i class="pl-ring"></i></div>`;
 function houseUI(k,D){if(!D.items.length)return'';const cur=CFG.houses.find(h=>h.id===D.house);
   if(!cur)return D.exc?`<button class="pl-house exc">Excepción · sin casa</button>`:`<button class="pl-house bad" onclick="plBad(${k})">Sin casa válida</button>`;
   const alts=PL.pop===k?houses(addD(PL.mon,k-1),D.items.map(x=>x.tid)).filter(h=>h.id!==D.house):[];
-  return `<div style="text-align:center"><button class="pl-house" onclick="plPop(${k})">⌂ ${cur.name}</button>${alts.map(h=>`<button class="pl-alt" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')}</div>`}
-function renderPlanner(){const el=document.getElementById('pl-root');if(!el)return;const full=[1,2,3,4,5].every(k=>PL.days[k].items.length),cur=monOf(new Date());
-  const lbl=PL.mon===cur?'Esta semana':PL.mon===addD(cur,7)?'Próxima semana':'Semana',nb=Object.keys(PL.bad).length;
-  const rec=recommend(addD(PL.mon,2),null,true).slice(0,5);
-  el.innerHTML=`<div class="pl-top"><button class="pl-ic" onclick="plWeek(-1)">←</button>
-  <div class="pl-pill"><b>${lbl}</b><span>${dFmt(PL.mon)} al ${dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">→</button>
-  <div class="pl-act">${PL.done?`<button class="pl-ic" title="Editar" onclick="plEdit()">✎</button>`:`<button class="pl-ic" title="Reiniciar semana" onclick="plReset()">↻</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">✓</button>`:''}`}</div></div>
+  return `<div style="text-align:center"><button class="pl-house" onclick="plPop(${k})">${IC.house}&nbsp;${cur.name}</button>${alts.map(h=>`<button class="pl-alt" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')}</div>`}
+function renderPlanner(){const el=document.getElementById('pl-root');if(!el)return;const sun=PL.view==='s',ks=DK(sun?7:1),dn0=sun?PL.doneS:PL.done,full=ks.every(k=>PL.days[k].items.length),cur=monOf(new Date());
+  const lbl=sun?(PL.mon===cur?'Este fin de semana':'Fin de semana'):PL.mon===cur?'Esta semana':PL.mon===addD(cur,7)?'Próxima semana':'Semana',nb=Object.keys(PL.bad).length;
+  const rec=recommend(addD(PL.mon,sun?6:2),null,true,sun).slice(0,5);
+  el.innerHTML=`<div class="pl-top"><button class="pl-ic" onclick="plWeek(-1)">${IC.back}</button>
+  <div class="pl-pill"><b>${lbl}</b><span>${sun?dFmt(addD(PL.mon,6)):dFmt(PL.mon)+' al '+dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">${IC.fwd}</button>
+  <div class="pl-act"><button class="pl-ic ${sun?'on':''}" title="Domingo / Semana" onclick="plView()">${IC.cal}</button>${dn0?`<button class="pl-ic" title="Editar" onclick="plEdit()">${IC.edit}</button>`:`<button class="pl-ic" title="Reiniciar semana" onclick="plReset()">${IC.reset}</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">${IC.check}</button>`:''}`}</div></div>
   ${nb?`<div class="pl-warn">Terrenor encontró datos en conflicto en ${nb} territorio${nb>1?'s':''} y no los recomendará hasta que los revises (toca el territorio).</div>`:''}
-  <div class="pl-days">${[1,2,3,4,5].map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="plDrop(event,${k})">
-    <h4>${DN[k]}</h4>${D.items.map(x=>card(PL.S[x.tid].t,x,k)).join('')}${houseUI(k,D)}${PL.done&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">🔗</button>`:''}</div>`}).join('')}</div>
-  ${PL.done?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGallery()">▦</button></div></div>`}`}
+  <div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="plDrop(event,${k})">
+    <h4>${dn(k)}</h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div>
+  ${dn0?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGallery()">${IC.plus}</button></div></div>`}`}
 function sheet(h,w){document.getElementById('tr-box').className='tr-box'+(w?' wide':'');document.getElementById('tr-box').innerHTML=h;document.getElementById('tr-sheet').classList.remove('hidden')}
 function trClose(){document.getElementById('tr-sheet').classList.add('hidden')}
-function trGallery(q='',sort='date'){let L=PL.T.map(t=>PL.S[t.id]);if(q)L=L.filter(s=>(s.t.number+' '+(s.t.name||'')).toLowerCase().includes(q.toLowerCase()));
+function trGallery(q='',sort='date'){const S=st(PL.view==='s'?7:1);let L=PL.T.map(t=>S[t.id]);if(q)L=L.filter(s=>(s.t.number+' '+(s.t.name||'')).toLowerCase().includes(q.toLowerCase()));
   L.sort(sort==='date'?(a,b)=>(a.last||'').localeCompare(b.last||'')||a.t.number-b.t.number:(a,b)=>a.t.number-b.t.number);
-  sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">←</button><h2 style="font-size:20px">Galería de Territorios</h2><span style="width:36px"></span></div>
-  <div style="display:flex;gap:8px;margin-top:16px"><input value="${q}" placeholder="Buscar" onchange="trGallery(this.value,'${sort}')"><button class="pl-ic ${sort==='date'?'on':''}" title="Ordenar por fecha" onclick="trGallery('${q}','${sort==='date'?'num':'date'}')">⇅</button></div>
+  sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">${IC.back}</button><h2 style="font-size:20px">Galería de Territorios</h2><span style="width:36px"></span></div>
+  <div style="display:flex;gap:8px;margin-top:16px"><input value="${q}" placeholder="Buscar" onchange="trGallery(this.value,'${sort}')"><button class="pl-ic ${sort==='date'?'on':''}" title="Ordenar por fecha" onclick="trGallery('${q}','${sort==='date'?'num':'date'}')">${IC.sort}</button></div>
   <div class="tr-g">${L.map(s=>`<div class="pl-card" style="max-width:none" onclick="trDetail('${s.t.id}')"><span class="pl-n" style="background:${extractTerritoryColor(s.t)}">${s.t.number}</span>${mini(s.t)}<div style="font-size:11px;color:var(--text-muted);margin-top:6px">${s.last?dFmt(s.last):'Nunca'}</div></div>`).join('')}</div>`,1)}
-function trDetail(tid){const s=PL.S[tid],t=s.t,asg=Object.values(PL.days).some(d=>d.items.some(x=>x.tid===tid)),hs=CFG.houses.filter(h=>h.links&&h.links[tid]);
-  sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">←</button><h2 style="font-size:20px">Territorio <span class="pl-n" style="position:static;display:inline-flex;transform:none;background:${extractTerritoryColor(t)}">${t.number}</span></h2><span style="width:36px"></span></div>
+function trDetail(tid){const sun=PL.view==='s',ks=DK(sun?7:1),s=st(sun?7:1)[tid],t=s.t,asg=ks.some(k=>PL.days[k].items.some(x=>x.tid===tid)),hs=CFG.houses.filter(h=>h.links&&h.links[tid]);
+  sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">${IC.back}</button><h2 style="font-size:20px">Territorio <span class="pl-n" style="position:static;display:inline-flex;transform:none;background:${extractTerritoryColor(t)}">${t.number}</span></h2><span style="width:36px"></span></div>
   <div style="background:#fff;border-radius:18px;padding:12px;margin:16px 0;border:1px solid var(--border)">${mini(t)}</div>
   <div class="tr-note"><small>Última realización</small><br><b>${s.last?dFmt(s.last)+' '+pdt(s.last).getFullYear():'Nunca'}</b>${s.partial?`<br><small>Manzanas pendientes: ${s.remaining.join(', ')}</small>`:''}${PL.bad[tid]?`<br><span style="color:var(--red)">⚠ ${PL.bad[tid]}</span>`:''}</div>
   <div class="tr-note"><small>Casas cercanas</small><br>${hs.map(h=>`<span class="tr-chip ${h.links[tid]==='closest'?'on':'n'}">${h.name}</span>`).join('')||'<i>Sin casas vinculadas (ver Casas)</i>'}</div>
   <div class="tr-note"><small>Territorios cercanos (toca para editar)</small><br>${PL.T.filter(x=>x.id!==tid).map(x=>`<span class="tr-chip ${isNear(tid,x.id)?'on':''}" onclick="trNb('${tid}','${x.id}')">${x.number}</span>`).join('')}</div>
-  ${asg||PL.done?'':`<div style="text-align:center;margin-top:10px"><small style="color:var(--text-muted)">Asignar a</small><br>${[1,2,3,4,5].map(k=>`<button class="tr-chip on" onclick="trClose();place(${k},'${tid}')">${DN[k].slice(0,3)}</button>`).join('')}</div>`}`)}
+  ${asg||(sun?PL.doneS:PL.done)?'':`<div style="text-align:center;margin-top:10px"><small style="color:var(--text-muted)">Asignar a</small><br>${ks.map(k=>`<button class="tr-chip on" onclick="trClose();place(${k},'${tid}')">${dn(k).slice(0,3)}</button>`).join('')}</div>`}`)}
 function trNb(a,b){if(isNear(a,b)){CFG.nb[a]=(CFG.nb[a]||[]).filter(x=>x!==b);CFG.nb[b]=(CFG.nb[b]||[]).filter(x=>x!==a)}else(CFG.nb[a]=CFG.nb[a]||[]).push(b);saveCfg();trDetail(a)}
+
+
+// ── Hosts: fixed people per weekday; their name is the form/link name ──
+const hostFor=k=>(CFG.hosts||[]).find(h=>h.day===k),HD=[[1,'Lun'],[2,'Mar'],[3,'Mié'],[4,'Jue'],[5,'Vie'],[7,'Dom']];let HO=null;
+function renderHosts(){const el=document.getElementById('ho-root');if(!el)return;
+  el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:28px;flex-wrap:wrap"><div><p class="panel-title" style="margin-bottom:4px">Hosts</p><p class="panel-subtitle" style="margin-bottom:0">Quien recibe el enlace de cada día del Programa</p></div><button class="btn btn-gold" onclick="hoEdit()">${IC.plus} Nuevo host</button></div>
+  <div class="forms-grid">${(CFG.hosts||[]).sort((a,b)=>a.day-b.day).map(h=>`<div class="form-card"><h3>${h.name}</h3><p>${h.day?(HD.find(d=>d[0]===h.day)||[0,'–'])[1]:'Sin día'}</p><div class="form-card-actions" style="margin-top:12px"><button class="btn btn-ghost" onclick="hoEdit('${h.id}')">Editar</button></div></div>`).join('')||'<div class="empty-state"><h3>Sin hosts aún</h3><p>Crea un host y asígnalo a un día fijo.</p></div>'}</div>`}
+function hoEdit(id){const h=(CFG.hosts||[]).find(x=>x.id===id);HO=h?{...h}:{id:genToken(),name:'',day:null,isNew:1};hoDraw()}
+function hoDraw(){sheet(`<h2 style="font-size:20px;margin-bottom:14px">${HO.isNew?'Nuevo host':'Editar host'}</h2><label>Nombre</label><input value="${HO.name}" placeholder="Ej: Nico" oninput="HO.name=this.value">
+  <label style="margin-top:14px">Día fijo</label>${HD.map(([d,l])=>`<span class="tr-chip ${HO.day===d?'on':''}" onclick="HO.day=${d};hoDraw()">${l}</span>`).join('')}
+  <div style="display:flex;gap:8px;margin-top:20px"><button class="btn btn-gold" onclick="hoSave()">Guardar</button><button class="btn btn-ghost" onclick="trClose()">Cancelar</button>${HO.isNew?'':`<button class="btn btn-ghost" style="color:var(--red);margin-left:auto" onclick="hoDel()">Eliminar</button>`}</div>`)}
+async function hoSave(){if(!HO.name.trim()||!HO.day){toast('Escribe el nombre y elige un día','error');return}const n=!!HO.isNew;delete HO.isNew;HO.name=HO.name.trim();
+  CFG.hosts=(CFG.hosts||[]).filter(h=>h.day!==HO.day||h.id===HO.id);CFG.hosts=n?[...CFG.hosts,HO]:CFG.hosts.map(h=>h.id===HO.id?HO:h);
+  await saveCfg();trClose();renderHosts();renderPlanner();toast('Host guardado ✓')}
+async function hoDel(){if(!confirm('¿Eliminar este host?'))return;CFG.hosts=CFG.hosts.filter(h=>h.id!==HO.id);await saveCfg();trClose();renderHosts();renderPlanner()}
 
 // ── houses panel ──
 const WD=[['L',1],['M',2],['X',3],['J',4],['V',5],['D',0]];
@@ -2779,6 +2817,38 @@ function hsLink(t){const v=HS.links[t];if(!v)HS.links[t]='closest';else if(v==='
 async function hsSave(){if(!HS.name.trim()){toast('Ponle un nombre a la casa','error');return}const isNew=HS.isNew;delete HS.isNew;HS.name=HS.name.trim();
   CFG.houses=isNew?[...CFG.houses,HS]:CFG.houses.map(h=>h.id===HS.id?HS:h);await saveCfg();trClose();renderHouses();renderPlanner();toast('Casa guardada ✓')}
 async function hsDel(){if(!confirm('¿Eliminar esta casa?'))return;CFG.houses=CFG.houses.filter(h=>h.id!==HS.id);await saveCfg();trClose();renderHouses();renderPlanner()}
+
+// ── Terrenor section: frequency settings, history reset, exception log ──
+function renderTerrenor(){const el=document.getElementById('tn-root');if(!el)return;
+  const inp=(id,l,v)=>`<div><label>${l}</label><input type="number" min="1" id="${id}" value="${v}"></div>`,x=CFG.exc.slice(-8).reverse();
+  el.innerHTML=`<div class="form-card" style="margin-bottom:16px"><h3>Frecuencia</h3><p style="margin-bottom:12px">Intervalo en días entre una realización completa y la siguiente.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">${inp('tn-min','Semana · mínimo',TR.min)}${inp('tn-max','Semana · máximo',TR.max)}${inp('tn-smin','Domingos · mínimo',TR.smin)}${inp('tn-smax','Domingos · máximo',TR.smax)}</div>
+  <button class="btn btn-gold" style="margin-top:14px" onclick="tnSave()">Guardar frecuencia</button></div>
+  <div class="form-card" style="margin-bottom:16px"><h3>Historial</h3>
+  <p>${CFG.resetAt?`El historial cuenta desde el ${dFmt(CFG.resetAt)} ${pdt(CFG.resetAt).getFullYear()}.`:'Terrenor usa todo el historial de reportes.'}</p>
+  <p style="margin:8px 0 14px">Reiniciarlo hace que Terrenor olvide las realizaciones pasadas y recalcule las recomendaciones desde cero. Los enlaces de los formularios y sus reportes no se borran.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" style="color:var(--red);border-color:var(--red)" onclick="tnReset()">Reiniciar historial</button>${CFG.resetAt?`<button class="btn btn-ghost" onclick="tnRestore()">Restaurar historial completo</button>`:''}</div></div>
+  <div class="form-card"><h3>Excepciones autorizadas</h3>${x.map(e=>`<div class="tr-note"><b>${dFmt(e.date)}</b> · T${e.territories.join(' y T')}<br><small>${e.rule}<br>Motivo: ${e.why} · ${e.by}</small></div>`).join('')||'<p>Sin excepciones registradas.</p>'}</div>`}
+async function tnSave(){const g=i=>Math.max(1,parseInt(document.getElementById(i).value)||1);CFG.min=g('tn-min');CFG.max=g('tn-max');CFG.smin=g('tn-smin');CFG.smax=g('tn-smax');applyCfg();await saveCfg();await loadWeek();renderTerrenor();toast('Frecuencia guardada ✓')}
+async function tnReset(){if(!confirm('¿Reiniciar el historial de Terrenor? Las recomendaciones se calcularán desde cero. Los enlaces de formularios no se borran.'))return;CFG.resetAt=ymd(new Date());await saveCfg();await loadWeek();renderTerrenor();toast('Historial reiniciado')}
+async function tnRestore(){CFG.resetAt=null;await saveCfg();await loadWeek();renderTerrenor();toast('Historial restaurado')}
+
+// ── multi-select delete (Reportes: reports · Formularios: forms/links) ──
+const SEL={kind:null,ids:new Set()},SK={reports:'reports-cards',forms:'forms-grid'};
+function selBar(kind){const el=document.getElementById('sel-bar-'+kind);if(!el)return;const on=SEL.kind===kind,n=SEL.ids.size;
+  el.innerHTML=on?`<span style="font-size:13px;color:var(--text-muted)">${n} seleccionado${n!==1?'s':''}</span><button class="btn btn-ghost" style="padding:7px 14px;font-size:12px" onclick="selAll()">Todos</button><button class="btn btn-danger" style="padding:7px 14px;font-size:12px" ${n?'':'disabled'} onclick="selDelete()">Eliminar</button><button class="btn btn-ghost" style="padding:7px 14px;font-size:12px" onclick="selCancel()">Cancelar</button>`
+  :`<button class="btn btn-ghost" style="padding:7px 14px;font-size:12px" onclick="selStart('${kind}')">Seleccionar</button>`}
+function selStart(kind){selCancel();SEL.kind=kind;document.getElementById(SK[kind]).classList.add('sel-on');selBar(kind)}
+function selCancel(){const k=SEL.kind;SEL.kind=null;SEL.ids=new Set();Object.values(SK).forEach(i=>{const e=document.getElementById(i);if(e){e.classList.remove('sel-on');e.querySelectorAll('.sel').forEach(c=>c.classList.remove('sel'))}});selBar('reports');selBar('forms')}
+function selAll(){const c=document.getElementById(SK[SEL.kind]).querySelectorAll('[data-form]');const all=SEL.ids.size===c.length;SEL.ids=new Set();c.forEach(e=>{e.classList.toggle('sel',!all);if(!all)SEL.ids.add(e.dataset.form)});selBar(SEL.kind)}
+document.addEventListener('click',e=>{if(!SEL.kind)return;const c=e.target.closest('[data-form]');if(!c||!document.getElementById(SK[SEL.kind]).contains(c))return;
+  e.preventDefault();e.stopPropagation();const id=c.dataset.form,on=!SEL.ids.has(id);on?SEL.ids.add(id):SEL.ids.delete(id);c.classList.toggle('sel',on);selBar(SEL.kind)},true);
+async function selDelete(){const kind=SEL.kind,ids=[...SEL.ids],n=ids.length;if(!n)return;
+  if(!confirm(kind==='reports'?`¿Eliminar los reportes de ${n} formulario${n>1?'s':''}? Esta acción no se puede deshacer.`:`¿Eliminar ${n} formulario${n>1?'s':''}/enlace${n>1?'s':''}? Los publicadores ya no podrán usar esos enlaces.`))return;
+  const q=`in.(${ids.join(',')})`,res=await sb(kind==='reports'?`territory_reports?form_id=${q}`:`territory_forms?id=${q}`,{method:'DELETE',prefer:'return=minimal'});
+  if(!res.ok){toast('Error al eliminar','error');return}
+  toast(`${n} eliminado${n>1?'s':''}`);selCancel();loadReports();loadForms();loadDashboard();if(typeof loadWeek==='function')loadWeek()}
+window.addEventListener('load',()=>{selBar('reports');selBar('forms')});
 </script>
 </body>
 </html>
