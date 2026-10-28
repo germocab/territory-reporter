@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Territory Reporter</title>
+<title>Territory Reporter · Terrenor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -577,6 +577,11 @@ background-image:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--gold)
 /* v10.3.5 */
 .tn-sec{margin-top:44px;padding-top:32px;border-top:1px solid var(--border)}
 .pl-galtools input{text-align:left!important}
+
+/* v10.3.6 — calm house button, no glow */
+.pl-house,.pl-house:hover,.pl-house:active{box-shadow:none!important;filter:none!important}
+html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
+.pl-alt,.pl-alt:hover{box-shadow:none!important}
 </style>
 </head>
 <body>
@@ -624,7 +629,7 @@ background-image:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--gold)
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.3.5 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.3.7 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -2677,7 +2682,7 @@ const dFmt=s=>{const d=pdt(s);return `${d.getDate()} de ${MES[d.getMonth()]}`};
 const rows=async p=>{try{const r=await sb(p,{method:'GET'});const a=await r.json();return Array.isArray(a)?a:[]}catch(e){return[]}};
 
 // ── config (houses, nearby territories, exception log): Supabase table terrenor_config, localStorage fallback ──
-function applyCfg(){CFG.hosts=CFG.hosts||[];TR.min=CFG.min||12;TR.max=CFG.max||30;TR.smin=CFG.smin||28;TR.smax=CFG.smax||90}
+function applyCfg(){CFG.hosts=CFG.hosts||[];TR.min=CFG.min||21;TR.max=CFG.max||30;TR.smin=CFG.smin||28;TR.smax=CFG.smax||90}
 async function loadCfg(){
   try{const a=await rows('terrenor_config?id=eq.main&select=data');if(a[0]&&a[0].data){Object.assign(CFG,a[0].data);applyCfg();return}}catch(e){}
   try{Object.assign(CFG,JSON.parse(localStorage.getItem('terrenor_cfg')||'{}'))}catch(e){}
@@ -2700,7 +2705,7 @@ function tState(T,F,R){const fm={},out={};F.forEach(f=>fm[f.id]=f);T.forEach(t=>
   R.map(r=>({r,d:(fm[r.form_id]||{}).assignment_date||(r.created_at||'').slice(0,10)})).sort((a,b)=>a.d.localeCompare(b.d)).forEach(({r,d})=>{
     const s=out[r.territory_id]||out[(T.find(t=>t.number===r.territory_num)||{}).id];if(!s||r.not_covered)return;
     const all=s.t.manzanas||[];s.worked=d;(r.all_territory?all:(r.manzanas_done||[])).forEach(m=>s.done.add(m));
-    if(all.length&&all.every(m=>s.done.has(m))){s.last=d;s.done=new Set()}});
+    if(r.all_territory||(all.length&&all.every(m=>s.done.has(m)))){s.last=d;s.done=new Set()}});
   Object.values(out).forEach(s=>{s.remaining=s.done.size?(s.t.manzanas||[]).filter(m=>!s.done.has(m)):[];s.partial=s.remaining.length>0});return out}
 // inconsistent records block recommendations until a human reviews them
 function integrity(T,F,R){const bad={},seen={};
@@ -2709,7 +2714,7 @@ function integrity(T,F,R){const bad={},seen={};
 // recommendations: oldest completion first; unfinished territories are handled by carry-over, never here.
 // With `near` (an unfinished territory is on the same day) geography is an eligibility rule, not a preference.
 function recommend(date,near,noHouse,sun){const k0=sun?7:1,min=sun?TR.smin:TR.min,used=new Set(DK(k0).flatMap(k=>PL.days[k].items.map(x=>x.tid)));
-  return Object.values(st(k0)).filter(s=>!s.partial&&!used.has(s.t.id)&&!PL.bad[s.t.id]).map(s=>({t:s.t,d:s.last?diff(date,s.last):999}))
+  return Object.values(st(k0)).filter(s=>!s.partial&&!used.has(s.t.id)&&!PL.bad[s.t.id]).map(s=>{const o=((PL.SS||{})[s.t.id]||{}).last,w=((PL.S||{})[s.t.id]||{}).last,l=[o,w,s.last].filter(Boolean).sort().pop();return{t:s.t,d:l?diff(date,l):999}})
     .filter(x=>x.d>=min&&(!near||near.some(n=>isNear(n,x.t.id)))&&(noHouse||houses(date,[...(near||[]),x.t.id]).length)).sort((a,b)=>b.d-a.d||a.t.number-b.t.number)}
 // validate putting `tids` on day k. `moving` = territories that would change day (for the "move" options)
 function check(k,tids,moving){const S=st(k),mn=k===7?TR.smin:TR.min,mx=k===7?TR.smax:TR.max,date=addD(PL.mon,k-1),issues=[],opts=[],hs=houses(date,tids),num=i=>'T'+S[i].t.number;
@@ -2727,8 +2732,9 @@ async function initPlanner(){await loadCfg();PL.mon=monOf(new Date());await load
 async function loadWeek(){
   const [T,F,R]=await Promise.all([rows('territories?select=*&order=number.asc'),rows('territory_forms?select=*'),rows('territory_reports?select=*')]);
   const isSun=f=>pdt(f.assignment_date).getDay()===0,live=f=>!CFG.resetAt||f.assignment_date>=CFG.resetAt,fid={};F.forEach(f=>fid[f.id]=f);
-  const F2=F.filter(live),R2=R.filter(r=>fid[r.form_id]&&live(fid[r.form_id])),Fw=F2.filter(f=>!isSun(f)),Fs=F2.filter(isSun);
-  const Rw=R2.filter(r=>!isSun(fid[r.form_id])),Rs=R2.filter(r=>isSun(fid[r.form_id]));
+  const rd=r=>(fid[r.form_id]||{}).assignment_date||(r.created_at||'').slice(0,10),
+    F2=F.filter(live),R2=R.filter(r=>{const d=rd(r);return d&&(!CFG.resetAt||d>=CFG.resetAt)}),Fw=F2.filter(f=>!isSun(f)),Fs=F2.filter(isSun);
+  const Rw=R2.filter(r=>pdt(rd(r)).getDay()!==0),Rs=R2.filter(r=>pdt(rd(r)).getDay()===0);
   PL.T=T;PL.S=tState(T,Fw,Rw);PL.SS=tState(T,Fs,Rs);PL.hist=new Set(Fw.map(f=>f.assignment_date));PL.histS=new Set(Fs.map(f=>f.assignment_date));PL.bad=integrity(T,F2,R2);PL.uq=Object.fromEntries(F.filter(f=>f.link_type==='unique').map(f=>[f.id,f]));PL.done=false;PL.doneS=false;PL.fids={};PL.pop=null;
   PL.days={};[1,2,3,4,5,7].forEach(k=>PL.days[k]={items:[],house:null,exc:false});
   const mine=F.filter(f=>{const o=diff(f.assignment_date,PL.mon);return o>=0&&o<=6&&o!==5});
@@ -2770,6 +2776,8 @@ function trAct(a,j){const {k,tid,moving}=PL.cf,why=(document.getElementById('trW
   else if(tid)place(k,tid,{force:1,reason:why});
   else{const D=PL.days[k],c=check(k,D.items.map(x=>x.tid),moving);logExc(k,D.items.map(x=>x.tid),c,why);D.exc=true;renderPlanner()}}
 function plBad(k){const ids=PL.days[k].items.map(x=>x.tid);PL.cf={k,tid:null,moving:ids};conflict(check(k,ids,ids))}
+function plRefresh(){if(document.hidden||!document.getElementById('panel-planner').classList.contains('active')||PL.gal||document.getElementById('tr-sheet').classList.contains('hidden')===false)return;loadWeek()}
+document.addEventListener('visibilitychange',plRefresh);setInterval(plRefresh,60000);
 function plQuiet(f){const el=document.getElementById('pl-root');el.classList.add('quiet');f();setTimeout(()=>el.classList.remove('quiet'),500)}
 function plPop(k){if(isDone(k))return;plQuiet(()=>{PL.pop=PL.pop===k?null:k;renderPlanner()})}
 function plHouse(k,id){plQuiet(()=>{PL.days[k].house=id;PL.pop=null;renderPlanner()})}
