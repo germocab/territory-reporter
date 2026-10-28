@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Territory Reporter · Terrenor</title>
+<title>Territory Reporter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -547,6 +547,36 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 @keyframes plAlts{from{opacity:0;transform:scaleY(.6)}to{opacity:1;transform:none}}
 @keyframes plAltIn{from{opacity:0;transform:translateY(-12px) scale(.7)}to{opacity:1;transform:none}}
 .quiet .pl-card,.quiet .pl-day{animation:none!important}
+
+/* v10.3.1 fix — make glass effect actually visible: give the board something to blur */
+.admin-main:has(#panel-planner.active){background-color:var(--bg);background-attachment:fixed;background-size:auto,auto,26px 26px;
+background-image:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--gold) 38%,transparent),transparent 38%),radial-gradient(circle at 88% 82%,color-mix(in srgb,var(--green) 34%,transparent),transparent 40%),radial-gradient(color-mix(in srgb,var(--text-muted) 75%,transparent) 2px,transparent 2.4px)}
+.sidebar{background:color-mix(in srgb,var(--surface) 40%,transparent)!important;border-color:color-mix(in srgb,var(--text) 14%,transparent)!important;box-shadow:0 10px 40px #0000002e,inset 0 1px 0 #ffffff55!important}
+.pl-day{background:color-mix(in srgb,var(--surface) 40%,transparent)!important;-webkit-backdrop-filter:blur(14px) saturate(150%)!important;backdrop-filter:blur(14px) saturate(150%)!important;border-color:color-mix(in srgb,var(--text) 14%,transparent)!important;box-shadow:0 8px 28px #0000001f,inset 0 1px 0 #ffffff55}
+.admin-panel{animation:none!important}
+
+/* v10.3.2 — plain frosted glass (no colors/lights); inline gallery */
+.admin-main:has(#panel-planner.active){background-color:var(--bg);background-attachment:scroll;background-size:24px 24px;background-image:radial-gradient(color-mix(in srgb,var(--text-dim) 70%,transparent) 1.3px,transparent 1.6px)}
+.sidebar{box-shadow:0 10px 40px #0000001f!important;border-color:var(--border)!important}
+.pl-day{box-shadow:0 2px 8px #0000000a!important;border-color:var(--border)!important}
+.pl-day.over{box-shadow:0 18px 36px #00000030!important}
+.pl-board{overflow:hidden;padding:16px 10px;margin:-16px -10px;max-height:1600px;transition:max-height .6s cubic-bezier(.2,.8,.2,1),opacity .4s ease,transform .6s cubic-bezier(.2,.8,.2,1),padding .6s,margin .6s}
+.gal-open .pl-board{max-height:0;opacity:0;transform:translateY(-48px);padding-top:0;padding-bottom:0;margin-top:0;margin-bottom:0;pointer-events:none}
+.pl-gal{max-height:0;opacity:0;overflow:hidden;transform:translateY(36px);transition:max-height .7s cubic-bezier(.2,.8,.2,1),opacity .45s ease .1s,transform .6s cubic-bezier(.2,.8,.2,1)}
+.gal-open .pl-gal{max-height:6000px;opacity:1;transform:none;overflow:visible;padding-top:6px}
+.pl-galhead{display:flex;justify-content:space-between;align-items:center;margin-top:28px}.pl-galhead h2{font-size:20px}
+.pl-galtools{display:flex;gap:8px;margin-top:16px;max-width:520px}
+.gal-open .pl-recwrap{margin-top:8px}
+
+/* v10.3.2.5 */
+.pl-top{max-height:120px;transition:max-height .5s cubic-bezier(.2,.8,.2,1),opacity .3s ease,margin .5s ease}
+.gal-open .pl-top{max-height:0;opacity:0;margin-top:0;margin-bottom:0;overflow:hidden;pointer-events:none}
+.pl-galtools{justify-content:center;align-items:center;max-width:460px;margin:18px auto 0!important}
+.pl-galtools input{flex:1;border-radius:100px!important;padding:11px 20px!important;text-align:center}
+
+/* v10.3.5 */
+.tn-sec{margin-top:44px;padding-top:32px;border-top:1px solid var(--border)}
+.pl-galtools input{text-align:left!important}
 </style>
 </head>
 <body>
@@ -576,8 +606,6 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
   <nav class="sidebar">
 
     <a class="nav-item active" onclick="showPanel('planner')" data-panel="planner"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programa</a>
-    <a class="nav-item" onclick="showPanel('hosts')" data-panel="hosts"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg>Hosts</a>
-    <a class="nav-item" onclick="showPanel('houses')" data-panel="houses"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>Casas</a>
     <a class="nav-item" onclick="showPanel('terrenor')" data-panel="terrenor"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Terrenor</a>
     <a class="nav-item" onclick="showPanel('forms')" data-panel="forms">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -596,7 +624,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.3.1 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.3.5 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -604,8 +632,6 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
     <button class="theme-fab" id="sb-toggle" onclick="toggleSidebar()" title="Abrir / cerrar menú"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
 
     <div id="panel-planner" class="admin-panel active"><div id="pl-root"></div></div>
-    <div id="panel-houses" class="admin-panel"><div id="hs-root"></div></div>
-    <div id="panel-hosts" class="admin-panel"><div id="ho-root"></div></div>
     <div id="panel-terrenor" class="admin-panel"><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0 · resumen de actividad y ajustes del algoritmo</p>
 <div id="dash-wrap">
       
@@ -623,7 +649,9 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
         </div>
       </div>
     </div>
-<div id="tn-root" style="margin-top:28px"></div></div>
+<div id="tn-root" style="margin-top:28px"></div>
+<div id="ho-root" class="tn-sec"></div>
+<div id="hs-root" class="tn-sec"></div></div>
     <!-- ── FORMS LIST ── -->
     <div id="panel-forms" class="admin-panel">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:32px;flex-wrap:wrap">
@@ -1112,9 +1140,7 @@ function showPanel(name) {
   if (name === 'reports') loadReports();
   if (name === 'dashboard') loadDashboard();
   if (name === 'planner') loadWeek();
-  if (name === 'houses') renderHouses();
-  if (name === 'hosts') renderHosts();
-  if (name === 'terrenor') { renderTerrenor(); loadDashboard(); }
+  if (name === 'terrenor') { renderTerrenor(); renderHosts(); renderHouses(); loadDashboard(); }
 }
 
 // ── DASHBOARD ──
@@ -2788,23 +2814,29 @@ function renderPlanner(){const el=document.getElementById('pl-root');if(!el)retu
   <div class="pl-pill"><b>${lbl}</b><span>${sun?dFmt(addD(PL.mon,6)):dFmt(PL.mon)+' al '+dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">${IC.fwd}</button>
   <div class="pl-act"><button class="pl-ic ${sun?'on':''}" title="Domingo / Semana" onclick="plView()">${IC.cal}</button>${dn0?`<button class="pl-ic" title="Editar" onclick="plEdit()">${IC.edit}</button>`:`<button class="pl-ic" title="Reiniciar semana" onclick="plReset()">${IC.reset}</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">${IC.check}</button>`:''}`}</div></div>
   ${nb?`<div class="pl-warn">Terrenor encontró datos en conflicto en ${nb} territorio${nb>1?'s':''} y no los recomendará hasta que los revises (toca el territorio).</div>`:''}
-  <div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" data-k="${k}" ondragover="plOver(event,this)" ondragleave="plLeave(this)" ondrop="plDrop(event,${k})">
-    <h4>${dn(k)}</h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div>
-  ${dn0?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGallery()">${IC.plus}</button></div></div>`}`}
+  <div class="pl-board"><div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" data-k="${k}" ondragover="plOver(event,this)" ondragleave="plLeave(this)" ondrop="plDrop(event,${k})">
+    <h4>${dn(k)}</h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div></div>
+  ${dn0?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGalToggle()">${IC.plus}</button></div></div>`}<div id="pl-gal" class="pl-gal"></div>`;plGalSync()}
 function sheet(h,w){document.getElementById('tr-box').className='tr-box'+(w?' wide':'');document.getElementById('tr-box').innerHTML=h;document.getElementById('tr-sheet').classList.remove('hidden')}
 function trClose(){document.getElementById('tr-sheet').classList.add('hidden')}
-function trGallery(q='',sort='date'){const S=st(PL.view==='s'?7:1);let L=PL.T.map(t=>S[t.id]);if(q)L=L.filter(s=>(s.t.number+' '+(s.t.name||'')).toLowerCase().includes(q.toLowerCase()));
+function galHTML(q,sort){const S=st(PL.view==='s'?7:1);let L=PL.T.map(t=>S[t.id]);if(q)L=L.filter(s=>(s.t.number+' '+(s.t.name||'')).toLowerCase().includes(q.toLowerCase()));
   L.sort(sort==='date'?(a,b)=>(a.last||'').localeCompare(b.last||'')||a.t.number-b.t.number:(a,b)=>a.t.number-b.t.number);
-  sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">${IC.back}</button><h2 style="font-size:20px">Galería de Territorios</h2><span style="width:36px"></span></div>
-  <div style="display:flex;gap:8px;margin-top:16px"><input value="${q}" placeholder="Buscar" onchange="trGallery(this.value,'${sort}')"><button class="pl-ic ${sort==='date'?'on':''}" title="Ordenar por fecha" onclick="trGallery('${q}','${sort==='date'?'num':'date'}')">${IC.sort}</button></div>
-  <div class="tr-g">${L.map(s=>`<div class="pl-card" style="max-width:none" onclick="trDetail('${s.t.id}')"><span class="pl-n" style="background:${extractTerritoryColor(s.t)}">${s.t.number}</span>${mini(s.t)}<div style="font-size:11px;color:var(--text-muted);margin-top:6px">${s.last?dFmt(s.last):'Nunca'}</div></div>`).join('')}</div>`,1)}
+  const qq=q.replace(/'/g,"");
+  return `<div class="pl-galhead"><button class="pl-ic" title="Volver al tablero" onclick="trGalClose()">${IC.back}</button><h2>Galería de Territorios</h2><span style="width:36px"></span></div>
+  <div class="pl-galtools"><input value="${qq}" placeholder="Buscar" onchange="trGallery(this.value,'${sort}')"><button class="pl-ic ${sort==='date'?'on':''}" title="Ordenar por fecha" onclick="trGallery('${qq}','${sort==='date'?'num':'date'}')">${IC.sort}</button></div>
+  <div class="tr-g">${L.map(s=>`<div class="pl-card" style="max-width:none" onclick="trDetail('${s.t.id}')"><span class="pl-n" style="background:${extractTerritoryColor(s.t)}">${s.t.number}</span><div class="pl-map">${mini(s.t)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:6px">${s.last?dFmt(s.last):'Nunca'}</div></div>`).join('')}</div>`}
+function trGallery(q='',sort='date'){const g=document.getElementById('pl-gal'),root=document.getElementById('pl-root');if(!g)return;const was=!!PL.gal;PL.gal={q,sort};g.innerHTML=galHTML(q,sort);
+  if(!was)requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('gal-open')))}
+function plGalSync(){const g=document.getElementById('pl-gal'),root=document.getElementById('pl-root');if(!g)return;if(PL.gal){g.innerHTML=galHTML(PL.gal.q,PL.gal.sort);root.classList.add('gal-open')}else root.classList.remove('gal-open')}
+function trGalClose(){PL.gal=null;document.getElementById('pl-root').classList.remove('gal-open');const g=document.getElementById('pl-gal');setTimeout(()=>{if(!PL.gal&&g)g.innerHTML=''},600)}
+function trGalToggle(){PL.gal?trGalClose():trGallery()}
 function trDetail(tid){const sun=PL.view==='s',ks=DK(sun?7:1),s=st(sun?7:1)[tid],t=s.t,asg=ks.some(k=>PL.days[k].items.some(x=>x.tid===tid)),hs=CFG.houses.filter(h=>h.links&&h.links[tid]);
   sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">${IC.back}</button><h2 style="font-size:20px">Territorio <span class="pl-n" style="position:static;display:inline-flex;transform:none;background:${extractTerritoryColor(t)}">${t.number}</span></h2><span style="width:36px"></span></div>
   <div style="background:#fff;border-radius:18px;padding:12px;margin:16px 0;border:1px solid var(--border)">${mini(t)}</div>
   <div class="tr-note"><small>Última realización</small><br><b>${s.last?dFmt(s.last)+' '+pdt(s.last).getFullYear():'Nunca'}</b>${s.partial?`<br><small>Manzanas pendientes: ${s.remaining.join(', ')}</small>`:''}${PL.bad[tid]?`<br><span style="color:var(--red)">⚠ ${PL.bad[tid]}</span>`:''}</div>
   <div class="tr-note"><small>Casas cercanas</small><br>${hs.map(h=>`<span class="tr-chip ${h.links[tid]==='closest'?'on':'n'}">${h.name}</span>`).join('')||'<i>Sin casas vinculadas (ver Casas)</i>'}</div>
   <div class="tr-note"><small>Territorios cercanos (toca para editar)</small><br>${PL.T.filter(x=>x.id!==tid).map(x=>`<span class="tr-chip ${isNear(tid,x.id)?'on':''}" onclick="trNb('${tid}','${x.id}')">${x.number}</span>`).join('')}</div>
-  ${asg||(sun?PL.doneS:PL.done)?'':`<div style="text-align:center;margin-top:10px"><small style="color:var(--text-muted)">Asignar a</small><br>${ks.map(k=>`<button class="tr-chip on" onclick="trClose();place(${k},'${tid}')">${dn(k).slice(0,3)}</button>`).join('')}</div>`}`)}
+  ${asg||(sun?PL.doneS:PL.done)?'':`<div style="text-align:center;margin-top:10px"><small style="color:var(--text-muted)">Asignar a</small><br>${ks.map(k=>`<button class="tr-chip on" onclick="trClose();trGalClose();place(${k},'${tid}')">${dn(k).slice(0,3)}</button>`).join('')}</div>`}`)}
 function trNb(a,b){if(isNear(a,b)){CFG.nb[a]=(CFG.nb[a]||[]).filter(x=>x!==b);CFG.nb[b]=(CFG.nb[b]||[]).filter(x=>x!==a)}else(CFG.nb[a]=CFG.nb[a]||[]).push(b);saveCfg();trDetail(a)}
 
 
