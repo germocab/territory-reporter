@@ -577,7 +577,7 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.1.1 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.2 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -591,16 +591,9 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 <div id="dash-wrap">
       
       <div class="stats-grid" id="stats-grid">
-        <div class="stat-card"><div class="stat-num" id="stat-total-forms">–</div><div class="stat-label">Formularios enviados</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-total-reports">–</div><div class="stat-label">Reportes recibidos</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-pending">–</div><div class="stat-label">Sin respuesta</div></div>
         <div class="stat-card"><div class="stat-num" id="stat-coverage">–%</div><div class="stat-label">Cobertura promedio</div></div>
       </div>
       <div class="charts-grid">
-        <div class="chart-card">
-          <h3>Reportes por territorio</h3>
-          <div class="chart-wrap"><canvas id="chart-territories"></canvas></div>
-        </div>
         <div class="chart-card">
           <h3>Actividad por fecha</h3>
           <div class="chart-wrap"><canvas id="chart-activity"></canvas></div>
@@ -608,10 +601,6 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
         <div class="chart-card">
           <h3>Cobertura por reporte</h3>
           <div class="chart-wrap"><canvas id="chart-coverage"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3>Territorios más trabajados</h3>
-          <div class="chart-wrap"><canvas id="chart-top"></canvas></div>
         </div>
       </div>
     </div>
@@ -1123,17 +1112,15 @@ async function loadDashboard() {
   const coverages = reports.map(r => r.all_territory ? 100 : Math.round((r.manzanas_done?.length || 0) / (r.total_manzanas || 1) * 100));
   const avgCoverage = coverages.length ? Math.round(coverages.reduce((a,b) => a+b,0)/coverages.length) : 0;
 
-  document.getElementById('stat-total-forms').textContent = forms.length;
-  document.getElementById('stat-total-reports').textContent = reports.length;
-  document.getElementById('stat-pending').textContent = pending.length;
+  
+  
+  
   document.getElementById('stat-coverage').textContent = avgCoverage + '%';
 
   // Chart: reports per territory
   const byTerritory = {};
   reports.forEach(r => { byTerritory[r.territory_num] = (byTerritory[r.territory_num]||0)+1; });
   const tKeys = Object.keys(byTerritory).sort((a,b) => a-b);
-
-  drawChart('chart-territories', 'bar', tKeys.map(k => `T${k}`), tKeys.map(k => byTerritory[k]), 'Reportes', '#e8b84b');
 
   // Chart: activity by date
   const byDate = {};
@@ -1154,7 +1141,6 @@ async function loadDashboard() {
 
   // Chart: top territories by reports
   const sorted = tKeys.sort((a,b) => byTerritory[b]-byTerritory[a]).slice(0,8);
-  drawChart('chart-top', 'bar', sorted.map(k=>`T${k}`), sorted.map(k=>byTerritory[k]), 'Reportes', '#4caf7d', true);
 }
 
 function drawChart(id, type, labels, data, label, color, horizontal=false) {
@@ -2707,17 +2693,14 @@ async function loadWeek(){
     PL.fids[k]=f.id;PL.days[k]={items:ids.map(t=>({tid:t,carry:(m.carry||{})[t]||null})),house:m.house||null,token:f.token,exc:false}})}
   if(!PL.done)autoPlan();if(!PL.doneS)autoSunday();
   renderPlanner();renderHouses();renderHosts()}
-// Terrenor's weekly job: unfinished -> remaining manzanas same weekday (orange); finished/unreported -> new territory same weekday;
-// 1-3 manzanas left -> also add a NEW nearby territory alongside.
+// Terrenor's weekly job: unfinished -> remaining manzanas auto-assigned same weekday (orange). Completed -> no auto-assign; new territory only appears in Recommendations.
 function autoSunday(){const D=PL.days[7],date=addD(PL.mon,6);
   const p=Object.values(PL.SS).find(s=>s.partial&&s.worked&&diff(s.worked,PL.mon)<0);
   if(p){place(7,p.t.id,{carry:p.remaining,auto:1});return}
-  if(!PL.histS.has(addD(date,-7)))return;const r=recommend(date,null,false,true);if(r[0])place(7,r[0].t.id,{auto:1})}
+  /* completed / no pending manzanas: nothing is auto-assigned; Terrenor only suggests in the Recommendations bar */}
 function autoPlan(){const prev=addD(PL.mon,-7);
   Object.values(PL.S).filter(s=>s.partial&&s.worked&&diff(s.worked,PL.mon)<0).forEach(s=>{const wd=(pdt(s.worked).getDay()+6)%7+1;if(wd<=5&&!PL.days[wd].items.length)place(wd,s.t.id,{carry:s.remaining,auto:1})});
-  for(let k=1;k<=5;k++){const D=PL.days[k],date=addD(PL.mon,k-1),nearly=D.items.length&&D.items.every(x=>x.carry&&x.carry.length<=3);
-    if(D.items.length&&!nearly)continue;if(!D.items.length&&!PL.hist.has(addD(prev,k-1)))continue;
-    const r=recommend(date,nearly?D.items.map(x=>x.tid):null);if(r[0])place(k,r[0].t.id,{auto:1})}}
+  /* only territories with uncovered manzanas are auto-assigned (above); new territories are suggested in the Recommendations bar */}
 function place(k,tid,o={}){const D=PL.days[k];if(isDone(k))return;
   if(DK(k).some(j=>PL.days[j].items.some(x=>x.tid===tid))){toast('Ya está asignado esta semana','error');return}
   if(D.items.length>=3){toast('Máximo 3 territorios por día','error');return}
@@ -2863,8 +2846,13 @@ document.addEventListener('click',e=>{if(!SEL.kind)return;const c=e.target.close
   e.preventDefault();e.stopPropagation();const id=c.dataset.form,on=!SEL.ids.has(id);on?SEL.ids.add(id):SEL.ids.delete(id);c.classList.toggle('sel',on);selBar(SEL.kind)},true);
 async function selDelete(){const kind=SEL.kind,ids=[...SEL.ids],n=ids.length;if(!n)return;
   if(!confirm(kind==='reports'?`¿Eliminar los reportes de ${n} formulario${n>1?'s':''}? Esta acción no se puede deshacer.`:`¿Eliminar ${n} formulario${n>1?'s':''}/enlace${n>1?'s':''}? Los publicadores ya no podrán usar esos enlaces.`))return;
-  const q=`in.(${ids.join(',')})`,res=await sb(kind==='reports'?`territory_reports?form_id=${q}`:`territory_forms?id=${q}`,{method:'DELETE',prefer:'return=minimal'});
-  if(!res.ok){toast('Error al eliminar','error');return}
+  const del=async path=>{const r=await sb(path,{method:'DELETE',prefer:'return=minimal'});if(r.ok)return null;let m='';try{m=(await r.json()).message||''}catch(e){}return m||('HTTP '+r.status)};
+  let err=null;
+  for(let a=0;a<ids.length&&!err;a+=20){const ch=ids.slice(a,a+20).map(x=>encodeURIComponent(x)).join(',');
+    if(kind==='forms'){await del(`territory_reports?form_id=in.(${ch})`);err=await del(`territory_forms?id=in.(${ch})`)}
+    else err=await del(`territory_reports?form_id=in.(${ch})`)}
+  if(err){toast('Error al eliminar: '+err,'error');return}
+  if(kind==='forms'){ids.forEach(id=>delete CFG.forms[id]);try{await saveCfg()}catch(e){}}
   toast(`${n} eliminado${n>1?'s':''}`);selCancel();loadReports();loadForms();loadDashboard();if(typeof loadWeek==='function')loadWeek()}
 window.addEventListener('load',()=>{selBar('reports');selBar('forms')});
 </script>
