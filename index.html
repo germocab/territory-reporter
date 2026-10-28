@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Territory Reporter · Terrenor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -582,6 +582,56 @@ background-image:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--gold)
 .pl-house,.pl-house:hover,.pl-house:active{box-shadow:none!important;filter:none!important}
 html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 .pl-alt,.pl-alt:hover{box-shadow:none!important}
+
+/* ═══ v10.4 — responsive / phone ═══ */
+.mob-foot,.m-only{display:none}
+@media(max-width:768px){
+ .d-only{display:none}.m-only{display:inline}
+ html,body{overflow-x:hidden}
+ #admin-screen{display:block!important}
+ .theme-fab{display:none!important}
+ /* bottom navbar */
+ .sidebar{position:fixed!important;top:auto!important;left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;width:auto!important;height:auto!important;flex-direction:row!important;align-items:stretch;justify-content:space-around;gap:2px;padding:6px!important;border-radius:26px;overflow:visible;transform:none!important;opacity:1!important;pointer-events:auto!important;z-index:60}
+ .sidebar .nav-item{flex:1;min-width:0;flex-direction:column;justify-content:center;align-items:center;gap:3px;padding:8px 2px!important;margin:0!important;font-size:10px;line-height:1.1;border-left:none!important;border-radius:18px;text-align:center;white-space:nowrap}
+ .sidebar .nav-item svg{width:21px;height:21px;stroke-width:2.3}
+ .sidebar .nav-item.active{background:var(--gold-pale);color:var(--gold)}
+ .sidebar .sb-foot,.sidebar .nav-item[onclick*="doLogout"]{display:none!important}
+ /* content */
+ .admin-main{padding-left:0!important;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;overflow-x:hidden}
+ .admin-panel{padding:18px 14px 20px!important}
+ .panel-title{font-size:24px}
+ .mob-foot{display:flex;flex-direction:column;gap:12px;align-items:center;padding:26px 14px 8px;margin-top:20px;border-top:1px solid var(--border)}
+ .mob-foot-btns{display:flex;gap:10px;width:100%;max-width:360px}.mob-foot-btns .btn{flex:1;justify-content:center}
+ /* planner */
+ .pl-top{flex-wrap:wrap;gap:8px;margin:2px 0 18px}
+ .pl-pill{min-width:0;padding:8px 22px;flex:1;max-width:240px}
+ .pl-act{position:static;width:100%;justify-content:center}
+ .pl-days{grid-template-columns:1fr!important;gap:12px}
+ .pl-day{min-height:0;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:flex-start;padding:16px 10px 56px;gap:12px}
+ .pl-day>h4,.pl-day>small,.pl-day>.pl-hwrap,.pl-day>div[style*="text-align"]{flex-basis:100%;text-align:center}
+ .pl-day>small{margin-top:-6px!important}
+ .pl-day .pl-card{max-width:132px;flex:0 0 132px}
+ .pl-recwrap{margin-top:26px}
+ .pl-rec{justify-content:safe center;overflow-x:auto;padding:16px 12px 10px;margin:0 -14px;scrollbar-width:none}
+ .pl-rec::-webkit-scrollbar{display:none}
+ .pl-rec .pl-card,.pl-rec .pl-ic{flex-shrink:0}
+ .pl-galtools{max-width:100%}
+ .tr-g{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 12px}
+ .pl-warn{font-size:12px}
+ /* sheets become bottom sheets */
+ .tr-ov{align-items:flex-end;padding:0}
+ .tr-box{border-radius:28px 28px 0 0;max-height:88dvh;padding:20px 18px calc(24px + env(safe-area-inset-bottom,0px));animation:fadeUp .25s ease}
+ /* other panels */
+ .forms-grid{grid-template-columns:minmax(0,1fr)}
+ .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
+ .stat-num{font-size:26px}
+ .chart-wrap{max-width:100%;overflow:hidden}
+ .form-card-actions{flex-wrap:wrap}
+ .modal{width:calc(100% - 24px);max-width:none}
+ .login-card{width:calc(100% - 28px);padding:28px 20px}
+ table{display:block;overflow-x:auto;max-width:100%}
+}
+@media(max-width:380px){.sidebar .nav-item{font-size:9px}.pl-day .pl-card{flex-basis:118px;max-width:118px}}
 </style>
 </head>
 <body>
@@ -629,7 +679,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.3.7 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span id="main-theme-icon"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.4 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -782,6 +832,13 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 
 
 
+    <div class="mob-foot">
+      <div class="mob-foot-btns">
+        <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
+        <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
+      </div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.4 · Terrenor 1.0</div>
+    </div>
   </main>
 </div>
 
@@ -1037,7 +1094,7 @@ function updateThemeButtons(mode) {
   const icon = document.getElementById('sidebar-theme-icon');
   const label = document.getElementById('sidebar-theme-label');
   if (icon) icon.innerHTML = makeThemeIcon(isDark, 15, 2);
-  const mi = document.getElementById('main-theme-icon'); if (mi) mi.innerHTML = makeThemeIcon(isDark, 18, 2.6);
+  document.querySelectorAll('.theme-ic').forEach(mi => { mi.innerHTML = makeThemeIcon(isDark, 18, 2.6); });
   if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
   // Host floating button — heavier stroke, inherits --text color via CSS
   const hostIcon = document.getElementById('host-theme-icon');
@@ -2824,7 +2881,7 @@ function renderPlanner(){const el=document.getElementById('pl-root');if(!el)retu
   ${nb?`<div class="pl-warn">Terrenor encontró datos en conflicto en ${nb} territorio${nb>1?'s':''} y no los recomendará hasta que los revises (toca el territorio).</div>`:''}
   <div class="pl-board"><div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${ks.map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" data-k="${k}" ondragover="plOver(event,this)" ondragleave="plLeave(this)" ondrop="plDrop(event,${k})">
     <h4>${dn(k)}</h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div></div>
-  ${dn0?'':`<div class="pl-recwrap">Arrastra los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGalToggle()">${IC.plus}</button></div></div>`}<div id="pl-gal" class="pl-gal"></div>`;plGalSync()}
+  ${dn0?'':`<div class="pl-recwrap"><span class="d-only">Arrastra</span><span class="m-only">Toca</span> los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGalToggle()">${IC.plus}</button></div></div>`}<div id="pl-gal" class="pl-gal"></div>`;plGalSync()}
 function sheet(h,w){document.getElementById('tr-box').className='tr-box'+(w?' wide':'');document.getElementById('tr-box').innerHTML=h;document.getElementById('tr-sheet').classList.remove('hidden')}
 function trClose(){document.getElementById('tr-sheet').classList.add('hidden')}
 function galHTML(q,sort){const S=st(PL.view==='s'?7:1);let L=PL.T.map(t=>S[t.id]);if(q)L=L.filter(s=>(s.t.number+' '+(s.t.name||'')).toLowerCase().includes(q.toLowerCase()));
