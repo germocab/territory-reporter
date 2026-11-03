@@ -599,6 +599,17 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 /* ═══ v10.7 — Wednesday afternoon card sits under Wednesday ═══ */
 @media(min-width:901px){.pl-day[data-k="6"]{grid-column:3;grid-row:2}}
 
+/* ═══ Formularios — sections ═══ */
+#forms-grid{display:block!important}
+.fm-sec{margin-bottom:28px}
+.fm-sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:14px;user-select:none}
+.fm-sec>summary::-webkit-details-marker{display:none}
+.fm-sec>summary::before{content:'▾';color:var(--text-muted);transition:transform .2s}
+.fm-sec:not([open])>summary::before{transform:rotate(-90deg)}
+.fm-t{font-size:16px;font-weight:700;color:var(--text)}
+.fm-n{background:var(--gold-pale);color:var(--gold);border-radius:100px;padding:1px 9px;font-size:12px;font-weight:700}
+.fm-s{font-size:12px;color:var(--text-muted)}
+
 /* ═══ v10.4 — responsive / phone ═══ */
 .mob-foot,.m-only{display:none}
 @media(max-width:768px){
@@ -695,7 +706,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.7.1 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.7.2 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -853,7 +864,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
         <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.7.1 · Terrenor 1.0.1</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.7.2 · Terrenor 1.0.1</div>
     </div>
   </main>
 </div>
@@ -1314,7 +1325,7 @@ async function loadForms() {
   const terById = {}, terByNum = {};
   terList.forEach(t => { terById[t.id] = t; terByNum[t.number] = t; });
 
-  grid.innerHTML = forms.map(f => {
+  const cardOf = f => {
     // Slot keys: ids if available, else nums
     const slotKeys = f.territory_ids || f.territory_nums || (f.territory_num ? [f.territory_num] : []);
     // For a Link Único, a report only counts toward the *current* assignment (cycle_started_at)
@@ -1366,7 +1377,16 @@ async function loadForms() {
         <button class="btn btn-ghost" onclick="deleteForm('${f.id}', ${isUnique})" style="color:var(--red);border-color:var(--red)">Eliminar</button>
       </div>
     </div>`;
-  }).join('');
+  };
+  // Link único and single-use links live in separate collapsible sections
+  const uq = forms.filter(f => f.link_type === 'unique'), su = forms.filter(f => f.link_type !== 'unique');
+  const section = (title, sub, list) => !list.length ? '' : `
+    <details class="fm-sec" open>
+      <summary><span class="fm-t">${title}</span><span class="fm-n">${list.length}</span><span class="fm-s">${sub}</span></summary>
+      <div class="forms-grid">${list.map(cardOf).join('')}</div>
+    </details>`;
+  grid.innerHTML = section('🔗 Links únicos', 'El mismo enlace cada vez para un host', uq)
+    + section('Links de un solo uso', 'Un enlace nuevo por asignación', su);
 }
 
 async function deleteForm(id, isUnique) {
