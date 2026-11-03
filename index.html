@@ -459,6 +459,10 @@
   .host-fab:hover { border-color: var(--gold); transform: scale(1.07); box-shadow: 0 4px 20px rgba(0,0,0,0.22); }
   .host-fab svg { stroke: var(--text); }
   .host-theme-btn { right: 16px; }
+  .host-more-menu { position: fixed; top: 68px; right: 16px; z-index: 101; background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 8px; min-width: 250px; box-shadow: 0 12px 40px rgba(0,0,0,0.28); animation: fadeUp 0.2s ease; }
+  .host-more-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); }
+  .host-more-row:hover { background: var(--surface2); }
+  .host-more-row .theme-ic { display: inline-flex; }
   .host-back-btn  { left: 16px; }
 
   /* Per-territory accent color — set dynamically via JS on the host-screen element */
@@ -714,7 +718,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       Territorios
     </a>
 
-    <div class="sb-foot"><div class="ver"><div>Reporter v10.8.2</div><div>Terrenor 1.0.2</div></div><div class="sb-btns"><button class="pl-ic sb-theme" id="sb-settings" onclick="showPanel('settings')" title="Ajustes"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div></div>
+    <div class="sb-foot"><div class="ver"><div>Reporter v10.9</div><div>Terrenor 1.0.2</div></div><div class="sb-btns"><button class="pl-ic sb-theme" id="sb-settings" onclick="showPanel('settings')" title="Ajustes"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div></div>
   </nav>
 
   <!-- Main content -->
@@ -878,7 +882,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
         <button class="btn btn-ghost" onclick="showPanel('settings');scrollTo(0,0)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Ajustes</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.8.2 · Terrenor 1.0.2</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.9 · Terrenor 1.0.2</div>
     </div>
   </main>
 </div>
@@ -889,9 +893,16 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 <div id="host-screen" class="hidden">
 
   <!-- Floating theme button -->
-  <button class="host-fab host-theme-btn" onclick="toggleTheme()" id="host-theme-btn" title="Cambiar tema">
-    <svg id="host-theme-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"></svg>
+  <button class="host-fab host-theme-btn" onclick="hostMoreToggle(event)" id="host-more-btn" title="Más opciones">
+    <svg width="20" height="20" fill="currentColor" stroke="none" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg>
   </button>
+  <div id="host-more-menu" class="host-more-menu hidden">
+    <div class="host-more-row" onclick="toggleTheme()"><span class="theme-ic"></span><span id="host-theme-label">Modo oscuro</span></div>
+    <div class="host-more-row hidden" id="host-streets-row" onclick="hostToggleStreets()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <span>Mostrar nombres de calles</span><span class="set-switch host-streets-sw" style="margin-left:auto"><i></i></span>
+    </div>
+  </div>
 
   <!-- Step 0: Welcome + territory overview -->
   <div id="host-step-0" class="host-welcome">
@@ -1050,6 +1061,20 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       </div>
     </div>
 
+    <div class="form-group" style="margin-top:16px">
+      <label>SVG con nombres de calles (opcional)</label>
+      <div class="svg-upload-area" id="svgs-drop" onclick="document.getElementById('svgs-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleStreetDrop(event)">
+        <svg width="32" height="32" fill="none" stroke="var(--text-muted)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p>El mismo mapa, pero con los nombres de las calles</p>
+      </div>
+      <input type="file" id="svgs-file-input" accept=".svg" class="hidden" onchange="handleStreetFile(event)">
+      <div id="svgs-preview-wrap" class="hidden" style="text-align:center">
+        <div id="svgs-preview-container" style="max-height:200px;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);padding:12px;background:var(--surface2)"></div>
+        <button class="btn btn-ghost" onclick="clearStreetSvg()" style="margin-top:8px;padding:6px 14px;font-size:12px">✕ Quitar SVG de calles</button>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">Los textos de calles deben tener el ID "street name": en modo oscuro se vuelven blancos.</p>
+    </div>
+
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('territory-modal')">Cancelar</button>
       <button class="btn btn-gold" onclick="saveTerritory()">Guardar</button>
@@ -1135,7 +1160,9 @@ function updateThemeButtons(mode) {
   const icon = document.getElementById('sidebar-theme-icon');
   const label = document.getElementById('sidebar-theme-label');
   if (icon) icon.innerHTML = makeThemeIcon(isDark, 15, 2);
-  document.querySelectorAll('.set-switch').forEach(el => el.classList.toggle('on', isDark));
+  document.querySelectorAll('.set-switch:not(.host-streets-sw)').forEach(el => el.classList.toggle('on', isDark));
+  const hl = document.getElementById('host-theme-label'); if (hl) hl.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
+  if (typeof applyStreetTheme === 'function') applyStreetTheme();
   document.querySelectorAll('.theme-ic').forEach(mi => { mi.innerHTML = makeThemeIcon(isDark, 18, 2.6); });
   if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
   // Host floating button — heavier stroke, inherits --text color via CSS
@@ -1728,6 +1755,7 @@ async function loadTerritories() {
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
           ${isPriority ? '<span class="badge badge-gold" style="font-size:10px">⬆ Prioridad</span>' : ''}
           ${hasSvg ? '<span class="badge badge-green">SVG</span>' : '<span class="badge badge-dim">Sin SVG</span>'}
+          ${t.svg_streets ? '<span class="badge badge-green">Calles</span>' : ''}
         </div>
       </div>
       <h3 style="margin-bottom:4px">${t?.name || `Territorio ${n}`}</h3>
@@ -1758,6 +1786,7 @@ async function loadTerritories() {
 let currentTerritoryNum = null;
 let currentManzanas = [];
 let currentSvgData = null;
+let currentStreetSvg = null;
 let currentTerritoryId = null;
 
 async function openTerritoryModal(num) {
@@ -1766,6 +1795,7 @@ async function openTerritoryModal(num) {
   currentTerritoryNum = num;
   currentManzanas = [];
   currentSvgData = null;
+  currentStreetSvg = null;
   currentTerritoryId = null;
 
   // Modal title & subtitle
@@ -1785,6 +1815,8 @@ async function openTerritoryModal(num) {
   document.getElementById('tm-new-manzana').value = '';
   document.getElementById('svg-preview-wrap').classList.add('hidden');
   document.getElementById('svg-drop').classList.remove('hidden');
+  document.getElementById('svgs-preview-wrap').classList.add('hidden');
+  document.getElementById('svgs-drop').classList.remove('hidden');
 
   if (!isNew) {
     // num is actually the territory id when editing
@@ -1800,6 +1832,8 @@ async function openTerritoryModal(num) {
       document.getElementById('tm-num-input').value = t.number;
       document.getElementById('tm-name').value = t.name || '';
       if (currentSvgData) showSvgPreview(currentSvgData);
+      currentStreetSvg = t.svg_streets || null;
+      if (currentStreetSvg) showStreetPreview(currentStreetSvg);
     }
   }
   renderChips();
@@ -1853,6 +1887,28 @@ function readSvgFile(file) {
   reader.readAsText(file);
 }
 
+function handleStreetDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'image/svg+xml') readStreetFile(file);
+}
+function handleStreetFile(e) { const file = e.target.files[0]; if (file) readStreetFile(file); }
+function readStreetFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => { currentStreetSvg = ev.target.result; showStreetPreview(currentStreetSvg); };
+  reader.readAsText(file);
+}
+function showStreetPreview(svgData) {
+  document.getElementById('svgs-drop').classList.add('hidden');
+  document.getElementById('svgs-preview-wrap').classList.remove('hidden');
+  document.getElementById('svgs-preview-container').innerHTML = svgData;
+}
+function clearStreetSvg() {
+  currentStreetSvg = null;
+  document.getElementById('svgs-preview-wrap').classList.add('hidden');
+  document.getElementById('svgs-drop').classList.remove('hidden');
+  document.getElementById('svgs-file-input').value = '';
+}
 function showSvgPreview(svgData) {
   document.getElementById('svg-drop').classList.add('hidden');
   document.getElementById('svg-preview-wrap').classList.remove('hidden');
@@ -1878,15 +1934,20 @@ async function saveTerritory() {
   }
   // Duplicate numbers are allowed — different territories can share the same number
 
-  const payload = { number: num, name, manzanas: currentManzanas, svg_data: currentSvgData };
+  const payload = { number: num, name, manzanas: currentManzanas, svg_data: currentSvgData, svg_streets: currentStreetSvg };
 
   try {
-    if (currentTerritoryId) {
-      await sb(`territories?id=eq.${currentTerritoryId}`, { method:'PATCH', body: JSON.stringify(payload), prefer:'return=minimal' });
-    } else {
-      await sb('territories', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
+    const send = () => currentTerritoryId
+      ? sb(`territories?id=eq.${currentTerritoryId}`, { method:'PATCH', body: JSON.stringify(payload), prefer:'return=minimal' })
+      : sb('territories', { method:'POST', body: JSON.stringify(payload), prefer:'return=minimal' });
+    let r = await send();
+    let noCol = false;
+    if (!r.ok) { // svg_streets column not created yet → save the rest and warn
+      delete payload.svg_streets; noCol = true; r = await send();
+      if (!r.ok) throw new Error('save');
     }
-    toast('Territorio guardado ✓');
+    if (noCol && currentStreetSvg) { toast('Guardado, pero falta la columna svg_streets en Supabase (ejecuta el SQL)', 'error'); }
+    else toast('Territorio guardado ✓');
     closeModal('territory-modal');
     loadTerritories();
     populateTerritorySelect();
@@ -2527,14 +2588,50 @@ function _doStartBonus(t) {
   updateContinueBtn();
 }
 
+// ── v10.9: More options menu + street-names map ──
+let hostStreets = localStorage.getItem('hostStreets') === '1', hostMapT = null;
+function hostMoreSync() {
+  const onMap = !document.getElementById('host-step-1').classList.contains('hidden');
+  document.getElementById('host-streets-row').classList.toggle('hidden', !(onMap && hostMapT && hostMapT.svg_streets));
+  document.querySelectorAll('.host-streets-sw').forEach(el => el.classList.toggle('on', hostStreets));
+}
+function hostMoreToggle(e) {
+  if (e) e.stopPropagation();
+  const m = document.getElementById('host-more-menu'), open = m.classList.contains('hidden');
+  if (open) hostMoreSync();
+  m.classList.toggle('hidden', !open);
+}
+function hostToggleStreets() {
+  hostStreets = !hostStreets; localStorage.setItem('hostStreets', hostStreets ? '1' : '0');
+  hostMoreSync(); if (hostMapT) renderTerritoryMap(hostMapT);
+}
+document.addEventListener('click', e => {
+  const m = document.getElementById('host-more-menu');
+  if (m && !m.classList.contains('hidden') && !e.target.closest('#host-more-menu, #host-more-btn')) m.classList.add('hidden');
+});
+// Text with the ID "street name" turns white in dark mode so it stays readable
+const isStreetId = id => { const n = (id || '').toLowerCase().replace(/_x20_/g, '').replace(/[\s_\-]+/g, ''); return n.startsWith('streetname'); };
+function applyStreetTheme() {
+  const svg = document.querySelector('#svg-container svg'); if (!svg) return;
+  const dark = document.documentElement.classList.contains('dark');
+  svg.querySelectorAll('[id]').forEach(el => {
+    if (!isStreetId(el.getAttribute('id'))) return;
+    [el, ...el.querySelectorAll('*')].forEach(x => {
+      if (!x.style || !/^(text|tspan|path|polygon|polyline|rect|circle|ellipse|line|g)$/i.test(x.tagName)) return;
+      if (x.getAttribute('fill') === 'none') return;
+      if (dark) x.style.fill = '#ffffff'; else x.style.removeProperty('fill');
+    });
+  });
+}
 function renderTerritoryMap(t) {
+  hostMapT = t;
   const container = document.getElementById('svg-container');
   const manzanas = t?.manzanas || [];
 
   if (!t?.svg_data) { renderFallbackMap(container, manzanas); return; }
 
   const parser = new DOMParser();
-  const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+  const doc = parser.parseFromString((hostStreets && t.svg_streets) ? t.svg_streets : t.svg_data, 'image/svg+xml');
   const svg = doc.querySelector('svg');
   if (!svg) { renderFallbackMap(container, manzanas); return; }
 
@@ -2595,12 +2692,14 @@ function renderTerritoryMap(t) {
     };
     el.addEventListener('click', onTap);
     el.addEventListener('touchend', onTap);
+    if (selectedManzanas.includes(mName)) { fillEl.setAttribute('fill', '#22c55e'); fillEl.removeAttribute('fill-opacity'); el.style.transform = 'scale(1.08)'; }
   });
 
   container._matchedGroups = matched;
   container._currentManzanas = manzanas;
   container.innerHTML = '';
   container.appendChild(svg);
+  applyStreetTheme();
 }
 
 function renderFallbackMap(container, manzanas) {
