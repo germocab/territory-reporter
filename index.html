@@ -584,6 +584,14 @@ background-image:radial-gradient(circle at 12% 18%,color-mix(in srgb,var(--gold)
 html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 .pl-alt,.pl-alt:hover{box-shadow:none!important}
 
+/* ═══ v10.6 — drag from Gallery to the Week Board ═══ */
+.gal-open.gal-drag::after{content:'';position:fixed;inset:0;background:#0000004d;z-index:49;pointer-events:none;animation:plFade .25s ease}
+.gal-open.gal-drag .pl-board{position:fixed!important;left:50%!important;top:max(12px,env(safe-area-inset-top,0px))!important;width:min(1100px,96vw)!important;max-height:92vh!important;overflow:auto!important;opacity:1!important;pointer-events:auto!important;z-index:50;margin:0!important;padding:16px!important;transform:translateX(-50%)!important;background:var(--surface);border:1px solid var(--border);border-radius:28px;box-shadow:0 24px 60px #00000055;animation:plBoardIn .3s cubic-bezier(.2,.9,.3,1.1)}
+.pl-gal .pl-card[draggable=true]{cursor:grab}.pl-gal .pl-card[draggable=true]:active{cursor:grabbing}
+.pl-galhint{text-align:center;font-size:12px;color:var(--text-muted);margin-top:10px}
+@keyframes plFade{from{opacity:0}to{opacity:1}}
+@keyframes plBoardIn{from{opacity:0;transform:translate(-50%,-24px)}to{opacity:1;transform:translateX(-50%)}}
+
 /* ═══ v10.4 — responsive / phone ═══ */
 .mob-foot,.m-only{display:none}
 @media(max-width:768px){
@@ -680,7 +688,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.5.5 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.6 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -838,7 +846,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
         <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.5.5 · Terrenor 1.0</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.6 · Terrenor 1.0</div>
     </div>
   </main>
 </div>
@@ -2925,11 +2933,16 @@ function galHTML(q,sort){const S=st(PL.view==='s'?7:1);let L=PL.T.map(t=>S[t.id]
   const qq=q.replace(/'/g,"");
   return `<div class="pl-galhead"><button class="pl-ic" title="Volver al tablero" onclick="trGalClose()">${IC.back}</button><h2>Galería de Territorios</h2><span style="width:36px"></span></div>
   <div class="pl-galtools"><input value="${qq}" placeholder="Buscar" onchange="trGallery(this.value,'${sort}')"><button class="pl-ic ${sort==='date'?'on':''}" title="Ordenar por fecha" onclick="trGallery('${qq}','${sort==='date'?'num':'date'}')">${IC.sort}</button></div>
-  <div class="tr-g">${L.map(s=>`<div class="pl-card" style="max-width:none" onclick="trDetail('${s.t.id}')"><span class="pl-n" style="background:${extractTerritoryColor(s.t)}">${s.t.number}</span><div class="pl-map">${mini(s.t)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:6px">${s.last?dFmt(s.last):'Nunca'}</div></div>`).join('')}</div>`}
+  ${isDone(PL.view==='s'?7:1)?'':'<p class="pl-galhint d-only">Arrastra un territorio: el tablero aparece para soltarlo en un día.</p>'}
+  <div class="tr-g">${L.map(s=>`<div class="pl-card" style="max-width:none" ${isDone(PL.view==='s'?7:1)?'':`draggable="true" ondragstart="plGalDrag(event,'${s.t.id}')" ondragend="plGalDragEnd()"`} onclick="trDetail('${s.t.id}')"><span class="pl-n" style="background:${extractTerritoryColor(s.t)}">${s.t.number}</span><div class="pl-map">${mini(s.t)}</div><div style="font-size:11px;color:var(--text-muted);margin-top:6px">${s.last?dFmt(s.last):'Nunca'}</div></div>`).join('')}</div>`}
 function trGallery(q='',sort='date'){const g=document.getElementById('pl-gal'),root=document.getElementById('pl-root');if(!g)return;const was=!!PL.gal;PL.gal={q,sort};g.innerHTML=galHTML(q,sort);
   if(!was)requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('gal-open')))}
 function plGalSync(){const g=document.getElementById('pl-gal'),root=document.getElementById('pl-root');if(!g)return;if(PL.gal){g.innerHTML=galHTML(PL.gal.q,PL.gal.sort);root.classList.add('gal-open')}else root.classList.remove('gal-open')}
 function trGalClose(){PL.gal=null;document.getElementById('pl-root').classList.remove('gal-open');const g=document.getElementById('pl-gal');setTimeout(()=>{if(!PL.gal&&g)g.innerHTML=''},600)}
+// v10.6: holding a gallery territory brings the Week Board up over the gallery; after the drop the gallery stays open
+function plGalDrag(e,id){e.dataTransfer.setData('text',id);e.dataTransfer.effectAllowed='move';const r=document.getElementById('pl-root');setTimeout(()=>r&&r.classList.add('gal-drag'),30)}
+function plGalDragEnd(){const r=document.getElementById('pl-root');if(r)r.classList.remove('gal-drag')}
+document.addEventListener('dragend',plGalDragEnd);document.addEventListener('drop',()=>setTimeout(plGalDragEnd,0));
 function trGalToggle(){PL.gal?trGalClose():trGallery()}
 function trDetail(tid){const sun=PL.view==='s',ks=DK(sun?7:1),s=st(sun?7:1)[tid],t=s.t,asg=ks.some(k=>PL.days[k].items.some(x=>x.tid===tid)),hs=CFG.houses.filter(h=>h.links&&h.links[tid]);
   sheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="pl-ic" onclick="trClose()">${IC.back}</button><h2 style="font-size:20px">Territorio <span class="pl-n" style="position:static;display:inline-flex;transform:none;background:${extractTerritoryColor(t)}">${t.number}</span></h2><span style="width:36px"></span></div>
