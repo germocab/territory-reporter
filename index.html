@@ -695,7 +695,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.7 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.7.1 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -853,7 +853,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
         <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.7 · Terrenor 1.0.1</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.7.1 · Terrenor 1.0.1</div>
     </div>
   </main>
 </div>
@@ -2892,15 +2892,9 @@ function plPlan(sun){const ks=DK(sun?7:1),snap=JSON.stringify(PL.days),plan=[];l
 function plPicks(){const sun=PL.view==='s';if(isDone(sun?7:1)){toast('Pulsa Editar para cambiar esta semana','error');return}
   const {plan,skipped}=plPlan(sun);
   if(!plan.length){toast('Terrenor no tiene picks válidos para los días vacíos');return}
-  PL.picks=plan;
-  sheet(`<h2 style="font-size:20px;margin-bottom:6px">Terrenor Picks</h2>
-  <p style="color:var(--text-muted);font-size:13px;margin-bottom:10px">Solo se completan los días vacíos. Lo que ya asignaste no se toca y no se fuerza ninguna excepción.</p>
-  ${plan.map(p=>`<div class="tr-note"><b>${dn(p.k)}</b> · Territorio ${p.num}${p.type==='carry'?' <small>(manzanas pendientes)</small>':''}${p.house?` <small>· ${p.house}</small>`:''}</div>`).join('')}
-  ${skipped?`<p style="color:var(--text-muted);font-size:12px;margin-top:8px">${skipped} día${skipped>1?'s':''} sin un pick válido; quedan vacíos para que los asignes tú.</p>`:''}
-  <div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-gold" onclick="plApplyPicks()">Aplicar</button><button class="btn btn-ghost" onclick="trClose()">Cancelar</button></div>`)}
-function plApplyPicks(){trClose();const sun=PL.view==='s';
-  (PL.picks||[]).forEach(p=>{if(!PL.days[p.k].items.length)place(p.k,p.tid,{carry:p.carry,auto:1})});
-  PL.picks=null;renderPlanner();toast('Terrenor Picks aplicado ✓')}
+  /* v10.7.1: applied immediately (no preview) — only empty days, only valid picks; remove any you don't want with the X */
+  plan.forEach(p=>{if(!PL.days[p.k].items.length)place(p.k,p.tid,{carry:p.carry,auto:1})});
+  renderPlanner();toast(`Terrenor Picks: ${plan.length} asignado${plan.length>1?'s':''}${skipped?` · ${skipped} día${skipped>1?'s':''} sin pick válido`:''}`)}
 function plQuiet(f){const el=document.getElementById('pl-root');el.classList.add('quiet');f();setTimeout(()=>el.classList.remove('quiet'),500)}
 function plPop(k){if(isDone(k))return;plQuiet(()=>{PL.pop=PL.pop===k?null:k;renderPlanner()})}
 function plHouseX(k,id){const h=CFG.houses.find(x=>x.id===id),D=PL.days[k];if(!h)return;const dnm=DN[pdt(kD(k)).getDay()],
