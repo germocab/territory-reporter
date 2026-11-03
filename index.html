@@ -488,7 +488,6 @@ body{font-family:'Figtree','Instrument Sans',sans-serif}body::before{display:non
 .pl-card:hover{transform:translateY(-2px)}.pl-card.carry{outline:2px solid #e8541c}
 .pl-map{height:72px;width:100%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}.pl-map svg{width:100%!important;height:100%!important;max-height:72px!important;max-width:100%;display:block;preserve-aspect-ratio:xMidYMid meet}.pl-rec .pl-card{flex:0 0 112px;height:128px;box-sizing:border-box}.pl-map b{font-size:28px}.pl-card{padding-bottom:22px}
 .pl-n{position:absolute;top:-10px;left:50%;transform:translateX(-50%);min-width:24px;height:24px;border-radius:12px;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 7px}
-.pl-ring{position:absolute;right:8px;bottom:8px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-dim)}
 .pl-rm{position:absolute;top:2px;right:6px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px}
 .pl-house{display:inline-flex;background:var(--gold);color:#fff;border-radius:100px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;border:none;max-width:100%}
 .pl-house.bad{background:var(--red)}.pl-house.exc{background:var(--text-muted)}
@@ -610,6 +609,20 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
 .fm-n{background:var(--gold-pale);color:var(--gold);border-radius:100px;padding:1px 9px;font-size:12px;font-weight:700}
 .fm-s{font-size:12px;color:var(--text-muted)}
 
+/* ═══ v10.8 — Settings page, sidebar footer, planner tweaks ═══ */
+.sb-foot{flex-wrap:nowrap;justify-content:space-between;align-items:center;gap:8px;margin-top:auto!important}.sb-foot .ver{flex:1;min-width:0;padding:0 0 0 20px;line-height:1.5}
+.sb-btns{display:flex;gap:8px}
+.set-list{display:flex;flex-direction:column;gap:12px;max-width:560px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:16px 20px;cursor:pointer;transition:.15s}
+.set-row:hover{border-color:var(--gold)}.set-row b{display:block;font-size:15px}.set-row small{color:var(--text-muted);font-size:12px}
+.set-row.red{color:var(--red)}.set-row.red:hover{border-color:var(--red)}
+.set-switch{width:46px;height:26px;border-radius:100px;background:var(--border);position:relative;flex-shrink:0;transition:.2s}
+.set-switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px #0004}
+.set-switch.on{background:var(--gold)}.set-switch.on i{left:23px}
+.pl-ic.green,.pl-ic.green.on{background:var(--green);color:#fff;border-color:var(--green)}
+.pl-ic.red{color:var(--red)}.pl-ic.red:hover{background:color-mix(in srgb,var(--red) 14%,transparent)}
+.pl-pill{cursor:pointer}
+
 /* ═══ v10.4 — responsive / phone ═══ */
 .mob-foot,.m-only{display:none}
 @media(max-width:768px){
@@ -688,7 +701,6 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
   <nav class="sidebar">
 
     <a class="nav-item active" onclick="showPanel('planner')" data-panel="planner"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Programa</a>
-    <a class="nav-item" onclick="showPanel('terrenor')" data-panel="terrenor"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Terrenor</a>
     <a class="nav-item" onclick="showPanel('forms')" data-panel="forms">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Formularios
@@ -702,11 +714,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       Territorios
     </a>
 
-    <a class="nav-item" onclick="doLogout()" style="color:var(--red);margin-top:auto">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Salir
-    </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.7.2 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
+    <div class="sb-foot"><div class="ver"><div>Reporter v10.8.1</div><div>Terrenor 1.0.1</div></div><div class="sb-btns"><button class="pl-ic sb-theme" id="sb-settings" onclick="showPanel('settings')" title="Ajustes"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div></div>
   </nav>
 
   <!-- Main content -->
@@ -714,7 +722,13 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
     <button class="theme-fab" id="sb-toggle" onclick="toggleSidebar()" title="Abrir / cerrar menú"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
 
     <div id="panel-planner" class="admin-panel active"><div id="pl-root"></div></div>
-    <div id="panel-terrenor" class="admin-panel"><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0.1 · resumen de actividad y ajustes del algoritmo</p>
+    <div id="panel-settings" class="admin-panel"><p class="panel-title">Ajustes</p><p class="panel-subtitle">Tema, Terrenor y tu sesión</p>
+      <div class="set-list">
+        <div class="set-row" onclick="toggleTheme()"><div><b>Modo oscuro</b><small>Cambia entre tema claro y oscuro</small></div><span class="set-switch"><i></i></span></div>
+        <div class="set-row" onclick="showPanel('terrenor')"><div><b>Ajustes de Terrenor</b><small>Frecuencias, historial, hosts, casas y excepciones</small></div><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+        <div class="set-row red" onclick="doLogout()"><div><b>Cerrar sesión</b><small>Salir del panel</small></div><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+      </div></div>
+    <div id="panel-terrenor" class="admin-panel"><button class="pl-ic" title="Volver a Ajustes" onclick="showPanel('settings')" style="margin-bottom:14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0.1 · resumen de actividad y ajustes del algoritmo</p>
 <div id="dash-wrap">
       
       <div class="stats-grid" id="stats-grid">
@@ -862,9 +876,9 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
     <div class="mob-foot">
       <div class="mob-foot-btns">
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
-        <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
+        <button class="btn btn-ghost" onclick="showPanel('settings');scrollTo(0,0)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Ajustes</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.7.2 · Terrenor 1.0.1</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.8.1 · Terrenor 1.0.1</div>
     </div>
   </main>
 </div>
@@ -1121,6 +1135,7 @@ function updateThemeButtons(mode) {
   const icon = document.getElementById('sidebar-theme-icon');
   const label = document.getElementById('sidebar-theme-label');
   if (icon) icon.innerHTML = makeThemeIcon(isDark, 15, 2);
+  document.querySelectorAll('.set-switch').forEach(el => el.classList.toggle('on', isDark));
   document.querySelectorAll('.theme-ic').forEach(mi => { mi.innerHTML = makeThemeIcon(isDark, 18, 2.6); });
   if (label) label.textContent = isDark ? 'Modo claro' : 'Modo oscuro';
   // Host floating button — heavier stroke, inherits --text color via CSS
@@ -1219,6 +1234,7 @@ function showAdmin() {
 }
 
 function showPanel(name) {
+  const sbs = document.getElementById('sb-settings'); if (sbs) sbs.classList.toggle('on', name === 'settings' || name === 'terrenor');
   document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`panel-${name}`).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => {
@@ -2769,7 +2785,8 @@ plus:ic('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="
 check:ic('<polyline points="20 6 9 17 4 12"/>',18,3.4),edit:ic('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'),
 link:ic('<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',16),
 x:ic('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',14,3.2),sort:ic('<path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/>'),
-spark:ic('<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',18,2.4),
+spark:ic('<path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8L19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2L19 5"/><path d="M3 21l9-9"/><path d="M12.2 6.2L11 5"/>',18,2.4),
+trash:ic('<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',18,2.4),
 alert:ic('<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',16,2.8),
 house:ic('<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>',13,2.8)};
 const TR={min:12,max:30,smin:28,smax:90},DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],MN=['Octubre'];
@@ -2921,6 +2938,7 @@ function plHouseX(k,id){const h=CFG.houses.find(x=>x.id===id),D=PL.days[k];if(!h
   why=prompt(`${h.name} no está disponible el ${dnm}. Escribe el motivo para autorizar la excepción (queda registrada):`);if(why===null)return;
   logExc(k,D.items.map(x=>x.tid),{issues:[{t:`${h.name} no está disponible el ${dnm}.`}]},why);D.house=id;D.exc=true;PL.pop=null;renderPlanner()}
 function plHouse(k,id){plQuiet(()=>{PL.days[k].house=id;PL.pop=null;renderPlanner()})}
+async function plToday(){const cur=monOf(new Date());if(PL.mon===cur)return;PL.mon=cur;await loadWeek()}
 async function plWeek(n){PL.mon=addD(PL.mon,7*n);await loadWeek()}
 function plReset(){const s=PL.view==='s';if(s?PL.doneS:PL.done)return;DK(s?7:1).forEach(k=>PL.days[k]={items:[],house:null,exc:false});renderPlanner()}
 function plEdit(){if(PL.view==='s')PL.doneS=false;else PL.done=false;renderPlanner()}
@@ -2950,7 +2968,7 @@ async function submitWeek(){const now=new Date().toISOString(),sun=PL.view==='s'
 // ── render ──
 const mini=t=>t.svg_data?buildPreviewSvg(t.svg_data,t.manzanas||[],new Set(),false,true):`<b style="font-size:28px;color:var(--text)">${t.number}</b>`;
 const card=(t,x,k)=>`<div class="pl-card ${x&&x.carry?'carry':''}" ${k?'':`draggable="true" ondragstart="event.dataTransfer.setData('text','${t.id}')"`} onclick="trDetail('${t.id}')">
-  <span class="pl-n" style="background:${extractTerritoryColor(t)}">${t.number}</span>${k&&!isDone(k)?`<button class="pl-rm" onclick="event.stopPropagation();plRm(${k},'${t.id}')">${IC.x}</button>`:''}<div class="pl-map">${mini(t)}</div><i class="pl-ring"></i></div>`;
+  <span class="pl-n" style="background:${extractTerritoryColor(t)}">${t.number}</span>${k&&!isDone(k)?`<button class="pl-rm" onclick="event.stopPropagation();plRm(${k},'${t.id}')">${IC.x}</button>`:''}<div class="pl-map">${mini(t)}</div></div>`;
 function houseUI(k,D){if(!D.items.length)return'';const cur=CFG.houses.find(h=>h.id===D.house);
   if(!cur)return D.exc?`<button class="pl-house exc">Excepción · sin casa</button>`:`<button class="pl-house bad" onclick="plBad(${k})">Sin casa válida</button>`;
   const alts=PL.pop===k?houses(kD(k),D.items.map(x=>x.tid)).filter(h=>h.id!==D.house):[];
@@ -2961,8 +2979,8 @@ function renderPlanner(){const el=document.getElementById('pl-root');if(!el)retu
   const lbl=sun?(PL.mon===cur?'Este fin de semana':'Fin de semana'):PL.mon===cur?'Esta semana':PL.mon===addD(cur,7)?'Próxima semana':'Semana',nb=Object.keys(PL.bad).length;
   const rec=recommend(addD(PL.mon,sun?6:2),null,true,sun).slice(0,5);
   el.innerHTML=`<div class="pl-top"><button class="pl-ic" onclick="plWeek(-1)">${IC.back}</button>
-  <div class="pl-pill"><b>${lbl}</b><span>${sun?dFmt(addD(PL.mon,6)):dFmt(PL.mon)+' al '+dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">${IC.fwd}</button>
-  <div class="pl-act"><button class="pl-ic ${sun?'on':''}" title="Domingo / Semana" onclick="plView()">${IC.cal}</button>${dn0?'':`<button class="pl-ic" title="Terrenor Picks" onclick="plPicks()">${IC.spark}</button>`}${dn0?`<button class="pl-ic" title="Editar" onclick="plEdit()">${IC.edit}</button>`:`<button class="pl-ic" title="Reiniciar semana" onclick="plReset()">${IC.reset}</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">${IC.check}</button>`:''}`}</div></div>
+  <div class="pl-pill" title="Ir a la semana actual" onclick="plToday()"><b>${lbl}</b><span>${sun?dFmt(addD(PL.mon,6)):dFmt(PL.mon)+' al '+dFmt(addD(PL.mon,4))}</span></div><button class="pl-ic" onclick="plWeek(1)">${IC.fwd}</button>
+  <div class="pl-act"><button class="pl-ic ${sun?'on':''} ${PL.days[7].items.length?'green':''}" title="Domingo / Semana" onclick="plView()">${IC.cal}</button>${dn0?'':`<button class="pl-ic" title="Terrenor Picks" onclick="plPicks()">${IC.spark}</button>`}${dn0?`<button class="pl-ic" title="Editar" onclick="plEdit()">${IC.edit}</button>`:`<button class="pl-ic red" title="Reiniciar semana" onclick="plReset()">${IC.trash}</button>${full?`<button class="pl-ic on" title="Listo" onclick="submitWeek()">${IC.check}</button>`:''}`}</div></div>
   <div class="pl-board"><div class="pl-days" ${sun?'style="grid-template-columns:minmax(180px,260px);justify-content:center"':''}>${(sun?ks:[1,2,3,6,4,5]).map(k=>{const D=PL.days[k];return `<div class="pl-day ${D.items.some(x=>x.carry)?'carry':''}" data-k="${k}" ondragover="plOver(event,this)" ondragleave="plLeave(this)" ondrop="plDrop(event,${k})">
     ${dayProblems(k).length?`<button class="pl-prob" title="Problemas" onclick="event.stopPropagation();plProb(${k})">${IC.alert}</button>`:''}<h4>${dn(k)}<span class="pl-dd">${dShort(kD(k))}</span></h4><small style="margin-top:-10px;color:${hostFor(k)?'var(--text-muted)':'var(--red)'}">${hostFor(k)?hostFor(k).name:'Sin host'}</small>${D.items.map(x=>card(st(k)[x.tid].t,x,k)).join('')}${houseUI(k,D)}${dn0&&D.token?`<button class="pl-link" title="Copiar enlace" onclick="plCopy(${k})">${IC.link}</button>`:''}</div>`}).join('')}</div></div>
   ${dn0?'':`<div class="pl-recwrap"><span class="d-only">Arrastra</span><span class="m-only">Toca</span> los Territorios<div class="pl-rec">${rec.map(r=>card(r.t)).join('')}<button class="pl-ic" title="Más territorios" onclick="trGalToggle()">${IC.plus}</button></div></div>`}<div id="pl-gal" class="pl-gal"></div>`;plGalSync()}
