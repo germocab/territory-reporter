@@ -695,7 +695,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Salir
     </a>
-    <div class="sb-foot"><div class="ver">Reporter v10.7 · Terrenor 1.0</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
+    <div class="sb-foot"><div class="ver">Reporter v10.7 · Terrenor 1.0.1</div><button class="pl-ic sb-theme" onclick="toggleTheme()" title="Cambiar tema"><span class="theme-ic"></span></button></div>
   </nav>
 
   <!-- Main content -->
@@ -703,7 +703,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
     <button class="theme-fab" id="sb-toggle" onclick="toggleSidebar()" title="Abrir / cerrar menú"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
 
     <div id="panel-planner" class="admin-panel active"><div id="pl-root"></div></div>
-    <div id="panel-terrenor" class="admin-panel"><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0 · resumen de actividad y ajustes del algoritmo</p>
+    <div id="panel-terrenor" class="admin-panel"><p class="panel-title">Terrenor</p><p class="panel-subtitle">Versión 1.0.1 · resumen de actividad y ajustes del algoritmo</p>
 <div id="dash-wrap">
       
       <div class="stats-grid" id="stats-grid">
@@ -853,7 +853,7 @@ html.dark .pl-house:not(.bad):not(.exc){background:#3d70c4!important}
         <button class="btn btn-ghost" onclick="toggleTheme()"><span class="theme-ic"></span> Tema</button>
         <button class="btn btn-ghost" onclick="doLogout()" style="color:var(--red);border-color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Salir</button>
       </div>
-      <div class="ver" style="padding:0;text-align:center">Reporter v10.7 · Terrenor 1.0</div>
+      <div class="ver" style="padding:0;text-align:center">Reporter v10.7 · Terrenor 1.0.1</div>
     </div>
   </main>
 </div>
@@ -2903,6 +2903,9 @@ function plApplyPicks(){trClose();const sun=PL.view==='s';
   PL.picks=null;renderPlanner();toast('Terrenor Picks aplicado ✓')}
 function plQuiet(f){const el=document.getElementById('pl-root');el.classList.add('quiet');f();setTimeout(()=>el.classList.remove('quiet'),500)}
 function plPop(k){if(isDone(k))return;plQuiet(()=>{PL.pop=PL.pop===k?null:k;renderPlanner()})}
+function plHouseX(k,id){const h=CFG.houses.find(x=>x.id===id),D=PL.days[k];if(!h)return;const dnm=DN[pdt(kD(k)).getDay()],
+  why=prompt(`${h.name} no está disponible el ${dnm}. Escribe el motivo para autorizar la excepción (queda registrada):`);if(why===null)return;
+  logExc(k,D.items.map(x=>x.tid),{issues:[{t:`${h.name} no está disponible el ${dnm}.`}]},why);D.house=id;D.exc=true;PL.pop=null;renderPlanner()}
 function plHouse(k,id){plQuiet(()=>{PL.days[k].house=id;PL.pop=null;renderPlanner()})}
 async function plWeek(n){PL.mon=addD(PL.mon,7*n);await loadWeek()}
 function plReset(){const s=PL.view==='s';if(s?PL.doneS:PL.done)return;DK(s?7:1).forEach(k=>PL.days[k]={items:[],house:null,exc:false});renderPlanner()}
@@ -2937,7 +2940,9 @@ const card=(t,x,k)=>`<div class="pl-card ${x&&x.carry?'carry':''}" ${k?'':`dragg
 function houseUI(k,D){if(!D.items.length)return'';const cur=CFG.houses.find(h=>h.id===D.house);
   if(!cur)return D.exc?`<button class="pl-house exc">Excepción · sin casa</button>`:`<button class="pl-house bad" onclick="plBad(${k})">Sin casa válida</button>`;
   const alts=PL.pop===k?houses(kD(k),D.items.map(x=>x.tid)).filter(h=>h.id!==D.house):[];
-  return `<div class="pl-hwrap"><button class="pl-house ${PL.pop===k?'open':''}" onclick="plPop(${k})">${IC.house}<span>${cur.name}</span><svg class="pl-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>${PL.pop===k?`<div class="pl-alts">${alts.map((h,i)=>`<button class="pl-alt" style="--i:${i}" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')||'<small class="pl-none">Sin otras casas</small>'}</div>`:''}</div>`}
+  /* Terrenor 1.0.1: houses near these territories but NOT available that weekday are listed too (dimmed); choosing one logs an exception */
+  const wd=pdt(kD(k)).getDay(),un=PL.pop===k?CFG.houses.filter(h=>h.id!==D.house&&!(h.days||[]).includes(wd)&&D.items.every(x=>h.links&&h.links[x.tid])):[];
+  return `<div class="pl-hwrap"><button class="pl-house ${PL.pop===k?'open':''}" onclick="plPop(${k})">${IC.house}<span>${cur.name}</span><svg class="pl-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>${PL.pop===k?`<div class="pl-alts">${alts.map((h,i)=>`<button class="pl-alt" style="--i:${i}" onclick="plHouse(${k},'${h.id}')">${h.name}</button>`).join('')+un.map((h,i)=>`<button class="pl-alt" style="--i:${alts.length+i};opacity:.6" title="No disponible el ${DN[wd]}: requiere excepción" onclick="plHouseX(${k},'${h.id}')">${h.name} <small>· no disp. ${DN[wd].slice(0,3)}</small></button>`).join('')||'<small class="pl-none">Sin otras casas</small>'}</div>`:''}</div>`}
 function renderPlanner(){const el=document.getElementById('pl-root');if(!el)return;const sun=PL.view==='s',ks=DK(sun?7:1),dn0=sun?PL.doneS:PL.done,full=ks.every(k=>PL.days[k].items.length),cur=monOf(new Date());
   const lbl=sun?(PL.mon===cur?'Este fin de semana':'Fin de semana'):PL.mon===cur?'Esta semana':PL.mon===addD(cur,7)?'Próxima semana':'Semana',nb=Object.keys(PL.bad).length;
   const rec=recommend(addD(PL.mon,sun?6:2),null,true,sun).slice(0,5);
